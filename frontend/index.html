@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>AI Chat Widget — Select UI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:#fff}
+    #chatbox{width:100%;height:100vh;display:flex;flex-direction:column;padding:14px;box-sizing:border-box}
+    .bubble{padding:10px 14px;border-radius:14px;margin-bottom:10px;max-width:80%;line-height:1.4}
+    .user{background:#d9fdd3;margin-left:auto}
+    .bot{background:#f1f1f1;margin-right:auto}
+    #inputBox{display:flex;gap:8px;margin-top:auto;align-items:center}
+    #inputField{flex:1;padding:10px;border:1px solid #ccc;border-radius:8px}
+    #sendBtn{background:#0066ff;color:#fff;padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+    .quick-replies{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+    .chip{padding:8px 12px;background:#eee;border-radius:20px;cursor:pointer;font-size:14px}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    select{padding:8px;border-radius:8px;border:1px solid #ccc}
+    label{font-size:13px;color:#444;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <div id="messages"></div>
+
+    <!-- Controls: dropdown + quick chips -->
+    <div class="controls">
+      <label for="intentSelect">Quick choose</label>
+      <select id="intentSelect" aria-label="Choose topic">
+        <option value="">— Select a topic —</option>
+        <option value="Fees?">Fees?</option>
+        <option value="Eligibility?">Eligibility?</option>
+        <option value="Best MBA?">Best MBA?</option>
+        <option value="Placement stats?">Placement stats?</option>
+        <option value="Admission process?">Admission process?</option>
+        <option value="Scholarship options?">Scholarship options?</option>
+        <option value="Is MBA worth it?">Is MBA worth it?</option>
+      </select>
+
+      <button id="useSelect" aria-label="Send selected">Ask</button>
+    </div>
+
+    <div class="quick-replies" id="quickReplies"></div>
+
+    <div id="inputBox">
+      <input id="inputField" placeholder="Or type your question..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+<script>
+/* CONFIG */
+const BACKEND_URL = "https://your-backend.vercel.app/api/chat"; // <-- change to your backend
+const LEAD_WEBHOOK = "https://script.google.com/macros/s/AKfycbywwALaeB47_eBW3QyxoQBw-VEWy-cW0HW1kImCOcxP5MUO7Z2Y3iiW7_UlnYcivEA/exec";
+
+let messages = [];
+let userName = null;
+let userPhone = null;
+let leadCaptured = false;
+
+/* UI helpers */
+function addMessage(content, sender="bot"){
+  const box = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = "bubble " + sender;
+  div.textContent = content;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+function setQuickReplies(list){
+  const c = document.getElementById("quickReplies");
+  c.innerHTML = "";
+  list.forEach(t=>{
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.textContent = t;
+    chip.onclick = ()=>handleUserInput(t);
+    c.appendChild(chip);
+  });
+}
+
+/* initial UI */
+addMessage("Hi! Pick a topic or type. 😊");
+setQuickReplies(["Fees?","Eligibility?","Best MBA?","Placement?"]);
+
+/* Main handler: called for typed messages, chips, or select */
+async function handleUserInput(text){
+  if(!text) return;
+
+  // Show user bubble
+  addMessage(text, "user");
+  messages.push({ role:"user", content: text });
+
+  // Lead-detection (same keywords)
+  const intentKeywords = ["fee","fees","admission","apply","best","eligibility","compare","worth","join","placement"];
+  const lower = text.toLowerCase();
+  const hasIntent = intentKeywords.some(k => lower.includes(k));
+
+  // Lead capture flow using select/short inputs
+  if(!userName && hasIntent){
+    // Ask name (no typing required — user can choose chip or type)
+    addMessage("I can shortlist options. What's your name?");
+    userName = "pending";
+    return;
+  }
+  if(userName === "pending"){
+    userName = text;
+    addMessage("Thanks! WhatsApp number?");
+    userPhone = "pending";
+    return;
+  }
+  if(userPhone === "pending"){
+    userPhone = text;
+    // POST lead to Google Sheets (fire-and-forget)
+    try{
+      fetch(LEAD_WEBHOOK, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          name: userName,
+          phone: userPhone,
+          firstMessage: messages.find(m => m.role==="user")?.content || "",
+          conversation: messages,
+          timestamp: new Date().toISOString()
+        })
+      });
+    }catch(e){ console.warn("lead webhook error", e); }
+    addMessage("Thank you! Counselor will contact you shortly.");
+    leadCaptured = true;
+    return;
+  }
+
+  // Normal conversation: call backend
+  addMessage("Typing...", "bot");
+  try{
+    const resp = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages })
+    });
+    const data = await resp.json();
+
+    // Remove typing bubble
+    const msgs = document.querySelectorAll(".bot");
+    for(const b of msgs){
+      if(b.textContent === "Typing...") b.remove();
+    }
+
+    const reply = (data.reply || "Sorry, no reply").trim();
+    addMessage(reply, "bot");
+    messages.push({ role:"assistant", content: reply });
+
+    // re-show quick replies (short picks)
+    setQuickReplies(["Fees?","Eligibility?","Best MBA?","Apply now"]);
+  }catch(err){
+    console.error(err);
+    addMessage("Service error. Try again later.", "bot");
+  }
+}
+
+/* UI bindings */
+document.getElementById("sendBtn").onclick = ()=> {
+  const t = document.getElementById("inputField").value.trim();
+  if(!t) return;
+  document.getElementById("inputField").value = "";
+  handleUserInput(t);
+};
+
+document.getElementById("inputField").onkeypress = (e)=>{
+  if(e.key === "Enter") document.getElementById("sendBtn").click();
+};
+
+document.getElementById("useSelect").onclick = ()=>{
+  const sel = document.getElementById("intentSelect");
+  const val = sel.value;
+  if(!val) return;
+  // send selected short text as message
+  handleUserInput(val);
+  sel.value = "";
+};
+</script>
+</body>
+</html>
