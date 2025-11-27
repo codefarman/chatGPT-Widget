@@ -12,8 +12,9 @@ const DEFAULT_ALLOWED_ORIGINS = [
   "http://127.0.0.1:3000",
   "http://localhost:3000",
   "https://chat-gpt-widget-three.vercel.app",
-  "chat-gpt-widget-three.vercel.app" 
+  "chat-gpt-widget-three.vercel.app"
 ];
+
 let ALLOWED_ORIGINS = DEFAULT_ALLOWED_ORIGINS;
 if (process.env.ALLOWED_ORIGINS) {
   try {
@@ -24,8 +25,7 @@ if (process.env.ALLOWED_ORIGINS) {
   }
 }
 
-// Normalize allowed origins into a set of hosts (host:port when present)
-// Accept entries that are full origins (with scheme) or plain hostnames.
+// Normalize allowed origins into a set of hosts (host:port when present).
 function normalizeAllowedHosts(list) {
   const hosts = new Set();
   for (const entry of list) {
@@ -33,25 +33,24 @@ function normalizeAllowedHosts(list) {
     try {
       if (/^https?:\/\//i.test(entry)) {
         const u = new URL(entry);
-        hosts.add(u.host); // hostname:port if present
+        hosts.add(u.host); // hostname[:port]
       } else {
-        // treat as hostname (maybe with port)
-        hosts.add(entry.replace(/\/+$/, "")); // strip trailing slash if any
+        // treat as hostname (maybe with port) or origin without scheme
+        hosts.add(entry.replace(/\/+$/, ""));
       }
     } catch (e) {
-      // fallback: add the raw entry
       hosts.add(entry);
     }
   }
   return hosts;
 }
 
-const ALLOWED_HOSTS = normalizeAllowedHosts(ALLOWED_ORIGINS_RAW);
-
+const ALLOWED_HOSTS = normalizeAllowedHosts(ALLOWED_ORIGINS);
+console.log("Allowed origins (raw):", ALLOWED_ORIGINS);
 console.log("Allowed hosts (normalized):", Array.from(ALLOWED_HOSTS));
 
-
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
+// --- OpenAI & Lead webhook config ---
+const OPENAI_KEY = process.env.OPENAI_API_KEY || "";
 if (!OPENAI_KEY) console.warn("Warning: OPENAI_API_KEY is not set.");
 
 const LEAD_WEBHOOK_URL = process.env.LEAD_WEBHOOK_URL || "";
@@ -61,13 +60,34 @@ const LEAD_WEBHOOK_TOKEN = process.env.LEAD_WEBHOOK_TOKEN || "";
 const app = express();
 app.use(express.json());
 
-// --- CORS setup ---
+// Helper to extract host from incoming Origin header
+function originToHost(origin) {
+  if (!origin || typeof origin !== "string") return null;
+  try {
+    const u = new URL(origin);
+    return u.host; // hostname[:port]
+  } catch (e) {
+    return origin.replace(/\/+$/, "");
+  }
+}
+
+// --- CORS setup (compare hosts) ---
 const corsOptions = {
   origin: function (origin, callback) {
     // allow non-browser requests (Postman / server-to-server)
     if (!origin) return callback(null, true);
+
+    const originHost = originToHost(origin);
+    if (!originHost) {
+      console.warn("Unable to parse origin header:", origin);
+      return callback(new Error("CORS origin invalid"));
+    }
+
+    if (ALLOWED_HOSTS.has(originHost)) return callback(null, true);
+    // Also allow exact origin string if present in allowed origins raw
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    console.warn("Blocked CORS origin:", origin);
+
+    console.warn("Blocked CORS origin:", origin, "=> host:", originHost);
     return callback(new Error("CORS policy: Origin not allowed"));
   },
   methods: ["GET", "POST", "OPTIONS"],
@@ -76,7 +96,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Lightweight OPTIONS responder to avoid path-to-regexp issues
+// Lightweight OPTIONS responder (avoid path-to-regexp errors)
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
@@ -93,15 +113,12 @@ app.use((err, req, res, next) => {
 // --- OpenAI client ---
 const openai = new OpenAI({ apiKey: OPENAI_KEY });
 
-// --- Utils: parse JSON robustly from model text ---
+// Robust JSON parser for model output
 function tryParseJsonFromText(text) {
   if (!text || typeof text !== "string") return null;
-  // Direct parse
   try {
-    const j = JSON.parse(text);
-    return j;
+    return JSON.parse(text);
   } catch (e) {
-    // Try to extract first {...} block
     const m = text.match(/{[\s\S]*}/);
     if (m) {
       try {
@@ -114,7 +131,7 @@ function tryParseJsonFromText(text) {
   }
 }
 
-// --- /chat endpoint (returns { reply, chips }) ---
+// --- /chat endpoint ---
 app.post("/chat", async (req, res) => {
   try {
     const { messages } = req.body;
@@ -122,7 +139,6 @@ app.post("/chat", async (req, res) => {
       return res.status(400).json({ error: "messages (array) required" });
     }
 
-    // Conversion-focused system prompt asking for strict JSON output
     const systemPrompt = `
 You are an empathetic MBA counselor for working professionals (1–10 years) in India.
 Primary goal: help users quickly via concise replies and clickable chips, and provide detailed information when the user explicitly asks for it (lists, comparisons, top college lists, placement details).
@@ -162,36 +178,29 @@ Examples (the model must output JSON only):
 {"reply":"Sorry, try again","chips":["Shortlist me","Apply now"]}
 
 Be careful: output JSON only.
-
 `;
 
-    // Build messages payload (keep last few messages)
-    const payloadMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.slice(-8),
-    ];
+    const payloadMessages = [{ role: "system", content: systemPrompt }, ...messages.slice(-8)];
 
-    // Call the OpenAI chat API
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: payloadMessages,
-      temperature: 0.0, // deterministic for JSON output
+      temperature: 0.0,
       max_tokens: 350,
     });
 
     const raw = response?.choices?.[0]?.message?.content ?? "";
     const parsed = tryParseJsonFromText(raw);
 
-    // If parsed JSON valid and has reply+chips, return structured object
     if (parsed && typeof parsed.reply === "string" && Array.isArray(parsed.chips)) {
       const reply = parsed.reply.trim();
       const chips = parsed.chips.map((c) => String(c).trim()).filter(Boolean).slice(0, 6);
       return res.json({ reply, chips });
     }
 
-    // Fallback: if model output not valid JSON
+    // fallback when model didn't return JSON
     const fallbackReply = (typeof raw === "string" ? raw.split("\n")[0] : "Sorry, try again").trim();
-    const defaultChips = ["Fees?","Eligibility?","Best MBA?","Placement?","Apply now"];
+    const defaultChips = ["Apply now"];
     return res.json({ reply: fallbackReply, chips: defaultChips });
   } catch (err) {
     console.error("Chat error:", err?.response?.data ?? err?.message ?? err);
@@ -199,39 +208,18 @@ Be careful: output JSON only.
   }
 });
 
-// --- /lead endpoint (proxy to Apps Script) ---
+// --- /lead endpoint ---
 app.post("/lead", async (req, res) => {
   try {
     const { name, phone, firstMessage, conversation, timestamp } = req.body;
-
-    if (!name || !phone) {
-      return res.status(400).json({ error: "name and phone are required" });
-    }
-
-    if (!LEAD_WEBHOOK_URL) {
-      console.error("LEAD_WEBHOOK_URL not configured.");
-      return res.status(500).json({ error: "lead_webhook_not_configured" });
-    }
+    if (!name || !phone) return res.status(400).json({ error: "name & phone required" });
+    if (!LEAD_WEBHOOK_URL) return res.status(500).json({ error: "lead_webhook_not_configured" });
 
     const cleanPhone = String(phone).replace(/\D/g, "");
+    const payload = { name, phone: cleanPhone, firstMessage: firstMessage || "", conversation: conversation || [], timestamp: timestamp || new Date().toISOString() };
+    const url = LEAD_WEBHOOK_TOKEN ? `${LEAD_WEBHOOK_URL}${LEAD_WEBHOOK_URL.includes("?") ? "&" : "?"}token=${encodeURIComponent(LEAD_WEBHOOK_TOKEN)}` : LEAD_WEBHOOK_URL;
 
-    const payload = {
-      name,
-      phone: cleanPhone,
-      firstMessage: firstMessage || "",
-      conversation: conversation || [],
-      timestamp: timestamp || new Date().toISOString(),
-    };
-
-    const url = LEAD_WEBHOOK_TOKEN
-      ? `${LEAD_WEBHOOK_URL}${LEAD_WEBHOOK_URL.includes("?") ? "&" : "?"}token=${encodeURIComponent(LEAD_WEBHOOK_TOKEN)}`
-      : LEAD_WEBHOOK_URL;
-
-    const axiosResp = await axios.post(url, payload, {
-      headers: { "Content-Type": "application/json" },
-      timeout: 15000,
-    });
-
+    const axiosResp = await axios.post(url, payload, { headers: { "Content-Type": "application/json" }, timeout: 15000 });
     return res.status(200).json({ success: true, forwarded: true, appsScriptResponse: axiosResp.data || null });
   } catch (err) {
     console.error("Lead forward error:", err?.response?.data ?? err?.message ?? err);
@@ -239,12 +227,13 @@ app.post("/lead", async (req, res) => {
   }
 });
 
-// --- health check ---
+// health check
 app.get("/", (req, res) => res.send({ status: "ok", time: new Date().toISOString() }));
 
-// --- start server ---
+// start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
-  console.log("Allowed origins:", ALLOWED_ORIGINS);
+  console.log("Allowed origins (raw):", ALLOWED_ORIGINS);
+  console.log("Allowed hosts (normalized):", Array.from(ALLOWED_HOSTS));
 });
