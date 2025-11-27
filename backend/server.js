@@ -322,11 +322,11 @@ You must ALWAYS obey these rules.
     
     const isDetailedRequest = /top|list|give|colleges|detailed|compare|placements|rank/i.test(userInput);
 
-    const modelToUse = isDetailedRequest ? "gpt-5" : "gpt-4o-mini";
+    // const modelToUse = isDetailedRequest ? "gpt-5" : "gpt-4o-mini";
     const maxTokens = wantsList ? 1200 : 350;
     
     const response = await openai.chat.completions.create({
-      model: modelToUse ,
+          model: "gpt-4o-mini",
       messages: payloadMessages,
       temperature: 0.0,
       max_tokens: maxTokens,
