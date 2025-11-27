@@ -3,206 +3,207 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>AI MBA Counselor — Enhanced Widget</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap">
+<title>AI MBA Counselor</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
 :root{
-  --accent:#0b76ff; --accent2:#00c2ff; --bg:#f4f8ff; --muted:#64748b;
-  --radius:14px; --shadow:0 18px 48px rgba(8,30,60,0.08);
+  --bg: #f8f9fc;
+  --chat-bg: #ffffff;
+  --user-bg: #0b76ff;
+  --bot-bg: #f1f3f5;
+  --accent: #0b76ff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#06202a}
-.container{display:flex;align-items:center;justify-content:center;height:100vh;padding:18px}
-.widget{width:100%;max-width:430px;height:94vh;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(11,118,255,0.04)}
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.widget { width: 100%; max-width: 460px; height: 94vh; background: var(--chat-bg); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; }
 
-/* header */
-.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #eef4fb;background:linear-gradient(90deg, rgba(11,118,255,0.04), transparent)}
-.logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-.hmeta .title{font-weight:700}
-.hmeta .subtitle{font-size:12px;color:var(--muted)}
+/* Header - ChatGPT Style */
+.header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: var(--chat-bg); text-align: center; font-weight: 600; font-size: 17px; position: relative; }
+/* .header::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 36px; height: 36px; background: linear-gradient(135deg,#0b76ff,#00c2ff); border-radius: 10px; } */
+.close-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; }
 
-/* messages */
-.messages{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent)}
-.msg{max-width:82%;padding:12px 14px;border-radius:12px;line-height:1.4;word-break:break-word;box-shadow:0 2px 0 rgba(9,30,60,0.02)}
-.msg.bot{background:#f3f4f6;align-self:flex-start}
-.msg.user{background:#dff9e1;align-self:flex-end}
-.msg .time{font-size:11px;color:var(--muted);margin-top:6px}
+/* Messages */
+.messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+.msg { max-width: 86%; line-height: 1.5; padding: 12px 16px; border-radius: 16px; animation: fadeIn 0.3s ease; font-size: 15px; }
+.msg.user { align-self: flex-end; background: var(--user-bg); color: white; border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--bot-bg); border-bottom-left-radius: 4px; }
 
-/* chips area (wrap, used both for initial categories and later chips) */
-.chips-area{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px dashed #eef4fb;background:linear-gradient(180deg,transparent,rgba(11,118,255,0.03))}
-.chip{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid rgba(11,118,255,0.06);cursor:pointer;box-shadow:0 6px 16px rgba(12,34,75,0.02);transition:transform .12s ease;font-size:13px}
-.chip:hover{transform:translateY(-3px)}
-.chip.primary{background:var(--accent);color:#fff;border:none;box-shadow:0 12px 30px rgba(11,118,255,0.12)}
+/* Markdown & Lists */
+.msg.bot p { margin: 8px 0; }
+.msg.bot ul, .msg.bot ol { margin: 10px 0; padding-left: 20px; }
+.msg.bot strong { font-weight: 600; }
 
-/* controls */
-.controls{display:flex;gap:8px;padding:12px;border-top:1px solid #eef4fb;background:var(--bg);align-items:center}
-.input{flex:1;padding:10px;border-radius:10px;border:1px solid #e6eefc;font-size:14px}
-.send{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+/* Tiles / Cards */
+.tile { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin: 12px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.2s; cursor: pointer; }
+.tile:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+.tile-title { font-weight: 600; font-size: 16px; margin-bottom: 6px; }
+.tile-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.tile-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.tag { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+.tile-action { margin-top: 12px; padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; }
 
-/* modal */
-.modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.36);display:none;align-items:center;justify-content:center;z-index:60}
-.modal{width:92%;max-width:420px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 20px 60px rgba(8,30,60,0.22)}
-.field{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.field input{padding:10px;border-radius:8px;border:1px solid #e6eefc;font-size:14px}
-.small{font-size:12px;color:var(--muted)}
+/* Chips */
+.chips-area { padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 10px; background: var(--chat-bg); border-top: 1px solid #e2e8f0; }
+.chip { padding: 10px 16px; background: #f1f5f9; border-radius: 999px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.chip:hover { background: #e2e8f0; }
+.chip.primary { background: var(--accent); color: white; }
 
-/* typing */
-.typing{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;background:#eaf2ff}
-.dot{width:6px;height:6px;border-radius:50%;background:#94a3b8;margin:0 3px;opacity:0.7;animation:blink 1s infinite}
-@keyframes blink{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}
+/* Input */
+.input-area { padding: 16px 20px; background: var(--chat-bg); border-top: 1px solid #e2e8f0; display: flex; gap: 12px; align-items: center; }
+#inputField { flex: 1; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 15px; outline: none; }
+#inputField:focus { border-color: var(--accent); }
+#sendBtn { background: var(--accent); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; }
+
+/* Typing & Animations */
+.typing { display: inline-flex; gap: 4px; align-items: center; }
+.dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: blink 1.4s infinite both; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* Modal */
+.modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: white; width: 90%; max-width: 400px; border-radius: 16px; padding: 24px; text-align: center; box-shadow: var(--shadow); }
+.modal input { width: 100%; padding: 14px; margin: 12px 0; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 15px; }
+.modal button { margin-top: 10px; padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; }
+.modal .primary { background: var(--accent); color: white; font-weight: 600; }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="widget" role="application" aria-label="MBA Counselor chat widget">
 
-    <div class="header">
-      <div class="logo">AI</div>
-      <div class="hmeta">
-        <div class="title">MBA Counselor</div>
-        <div class="subtitle">Tap a category or ask — chips come from AI</div>
-      </div>
-      <button id="close" style="margin-left:auto;border:none;background:transparent;cursor:pointer;color:var(--muted)">✕</button>
-    </div>
+<div class="widget">
+  <div class="header">
+    ChatGPT
+    <!-- <button class="close-btn" id="close">×</button> -->
+  </div>
 
-    <div id="messages" class="messages" aria-live="polite"></div>
+  <div id="messages" class="messages"></div>
+  <div id="chipsArea" class="chips-area"></div>
 
-    <!-- chips area shared for categories + AI chips -->
-    <div id="chipsArea" class="chips-area" aria-hidden="false"></div>
-
-    <div class="controls">
-      <input id="inputField" class="input" placeholder="Type or tap chips"/>
-      <button id="sendBtn" class="send">Send</button>
-    </div>
+  <div class="input-area">
+    <input id="inputField" placeholder="Ask about MBA, fees, colleges..." autocomplete="off"/>
+    <button id="sendBtn">↑</button>
   </div>
 </div>
 
-<!-- Lead modal -->
-<div id="leadModal" class="modal-back" role="dialog" aria-modal="true">
+<!-- Lead Modal -->
+<div id="leadModal" class="modal-back">
   <div class="modal">
-    <h3>Quick details</h3>
-    <p class="small">We'll share shortlisted programs on WhatsApp.</p>
-    <div class="field">
-      <label>Name</label>
-      <input id="leadName" placeholder="Your name"/>
-    </div>
-    <div class="field">
-      <label>WhatsApp number</label>
-      <input id="leadPhone" placeholder="e.g. 9876543210"/>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button id="leadCancel" style="background:transparent;border:none;cursor:pointer">Cancel</button>
-      <button id="leadSubmit" class="send">Submit</button>
+    <h3>🎉 Get Your Shortlist on WhatsApp</h3>
+    <p style="color:#64748b;margin:12px 0;font-size:14px;">Our counselor will call you in <5 mins</p>
+    <input id="leadName" placeholder="Your Name"/>
+    <input id="leadPhone" placeholder="WhatsApp Number" inputmode="numeric"/>
+    <div>
+      <button onclick="closeLeadModal()">Cancel</button>
+      <button class="primary" id="leadSubmit">Send Now</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const BACKEND_URL = "https://chatgpt-widget.onrender.com"; // <-- set your deployed backend
+// Config
+const BACKEND_URL = "https://chatgpt-widget.onrender.com";
 const CHAT_URL = BACKEND_URL + "/chat";
 const LEAD_URL = BACKEND_URL + "/lead";
-const STORAGE_KEY = "mba_widget_conversation_v1";
+const STORAGE_KEY = "mba_chat_v2";
 
-/* ================ STATE ================ */
-let messages = [];           // conversation messages (role + content)
-let awaiting = false;        // awaiting backend
-let lastIntent = null;       // last high-intent message
+let messages = [];
+let awaiting = false;
+let lastIntent = null;
 
-/* ================ DOM ================ */
-const messagesEl = document.getElementById("messages");
+const msgs = document.getElementById("messages");
 const chipsArea = document.getElementById("chipsArea");
 const inputField = document.getElementById("inputField");
 const sendBtn = document.getElementById("sendBtn");
-const leadModal = document.getElementById("leadModal");
-const leadName = document.getElementById("leadName");
-const leadPhone = document.getElementById("leadPhone");
 
-/* ================ UTILS ================ */
-function now(){ return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
-function esc(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
-function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); }catch(e){} }
-function loadState(){ try{ const j = localStorage.getItem(STORAGE_KEY); return j ? JSON.parse(j) : null; }catch(e){ return null; } }
-
-/* ================ MESSAGE RENDER ================ */
-function appendBot(text){
-  const d = document.createElement("div"); d.className="msg bot";
-  d.innerHTML = `<div>${formatReply(text)}</div><div class="time">${now()}</div>`;
-  messagesEl.appendChild(d); messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-function appendUser(text){
-  const d = document.createElement("div"); d.className="msg user";
-  d.innerHTML = `<div>${esc(text)}</div><div class="time">${now()}</div>`;
-  messagesEl.appendChild(d); messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-function formatReply(text){
-  if(!text) return "";
-  // If reply contains list markers or newlines, preserve formatting
-  if(/\n|^(\d+\)|\d+\.)|^- /m.test(text)){
-    // convert newlines to <br> and keep bullets
-    const html = esc(text).replace(/\n/g,"<br/>").replace(/\u2022/g,"•");
-    return html;
-  }
-  // short reply: escape normally
-  return esc(text);
+function appendUser(text) {
+  const div = document.createElement("div");
+  div.className = "msg user";
+  div.innerHTML = escapeHtml(text);
+  msgs.appendChild(div);
+  scrollToBottom();
 }
 
-/* typing indicator */
-function showTyping(){
-  const el = document.createElement("div"); el.className="msg bot"; el.id="typing";
-  el.innerHTML = `<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
-  messagesEl.appendChild(el); messagesEl.scrollTop = messagesEl.scrollHeight;
+function appendBot(html) {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.innerHTML = html;
+  msgs.appendChild(div);
+  scrollToBottom();
 }
-function removeTyping(){ const t = document.getElementById("typing"); if(t) t.remove(); }
 
-/* ================ CHIPS ================ */
-/* Render chips (provided by backend). If backend returns zero chips, we show a single fallback 'Apply now' chip. */
-function renderChips(list){
-  chipsArea.innerHTML = "";
-  const items = Array.isArray(list) ? list : [];
-  items.forEach(text => {
-    const el = document.createElement("div");
-    el.className = "chip";
-    el.textContent = text;
-    if(/apply|interested|shortlist/i.test(text)){
-      el.classList.add("primary");
-      el.onclick = () => openLeadModal();
-    } else {
-      el.onclick = () => submitUser(text);
-    }
-    chipsArea.appendChild(el);
+function renderTiles(tiles) {
+  tiles.forEach(tile => {
+    const t = document.createElement("div");
+    t.className = "tile";
+    t.innerHTML = `
+      <div class="tile-title">${tile.title || tile.name}</div>
+      <div class="tile-subtitle">${tile.subtitle || ''}</div>
+      ${tile.tags ? '<div class="tile-tags">' + tile.tags.map(tag => `<span class="tag">${tag}</span>`).join('') + '</div>' : ''}
+      <button class="tile-action" onclick="handleTileAction('${tile.actionChip || 'Shortlist me'}')">${tile.actionChip || 'Shortlist me'}</button>
+    `;
+    msgs.appendChild(t);
   });
-  if(items.length === 0){
-    const fallback = document.createElement("div");
-    fallback.className = "chip primary"; fallback.textContent = "Apply now";
-    fallback.onclick = openLeadModal;
-    chipsArea.appendChild(fallback);
-  }
+  scrollToBottom();
 }
 
-/* ================ INITIAL CATEGORIES ================ */
-/* Categories appear below initial bot message as chips — still come from frontend but are the initial choices only */
-const INITIAL_CATEGORIES = ["Online MBA","Executive MBA","Offline MBA","Study Abroad","Certifications"];
-function showInitialCategories(){
-  renderChips(INITIAL_CATEGORIES);
+function renderChips(chips) {
+  chipsArea.innerHTML = "";
+  chips.forEach(text => {
+    const chip = document.createElement("div");
+    chip.className = "chip" + (/(apply|shortlist|interested)/i.test(text) ? " primary" : "");
+    chip.textContent = text;
+    chip.onclick = () => {
+      if(/(apply|shortlist|interested)/i.test(text)) openLeadModal();
+      else submit(text);
+    };
+    chipsArea.appendChild(chip);
+  });
 }
 
-/* ================ BACKEND COMMUNICATION ================ */
-async function submitUser(text){
-  if(awaiting) return;
-  appendUser(text);
-  messages.push({ role:"user", content:text });
-  saveState();
+function showTyping() {
+  const t = document.createElement("div");
+  t.className = "msg bot";
+  t.innerHTML = `<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  t.id = "typing";
+  msgs.appendChild(t);
+  scrollToBottom();
+}
 
-  // check intent keywords (for lead prompts)
-  if (/(fee|fees|admission|apply|eligibility|placement|interested|shortlist|list|give list|top colleges)/i.test(text)){
-    lastIntent = text;
-  }
+function removeTyping() {
+  const t = document.getElementById("typing");
+  if (t) t.remove();
+}
+
+function scrollToBottom() {
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+async function submit(text) {
+  if (awaiting || !text.trim()) return;
+  const userMsg = text.trim();
+  appendUser(userMsg);
+  inputField.value = "";
+  messages.push({ role: "user", content: userMsg });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+
+  if (/(fee|apply|shortlist|interested|eligibility|placement)/i.test(userMsg)) lastIntent = userMsg;
 
   awaiting = true;
   showTyping();
 
-  try{
+  try {
     const res = await fetch(CHAT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -210,105 +211,72 @@ async function submitUser(text){
     });
     const data = await res.json();
     removeTyping();
-    const reply = (data?.reply ?? "Sorry, I couldn't process that.").trim();
 
-    // push assistant message to messages and save
-    messages.push({ role:"assistant", content: reply });
-    saveState();
+    const reply = (data.reply || "Let me help you with that.").trim();
+    messages.push({ role: "assistant", content: reply });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
 
-    // append reply (format preserves newline/lists)
-    appendBot(reply);
-
-    // render chips from backend (dynamic)
-    if (Array.isArray(data?.chips)){
-      renderChips(data.chips);
+    // Support rich tiles if backend sends them
+    if (data.tiles && Array.isArray(data.tiles)) {
+      renderTiles(data.tiles);
     } else {
-      // fallback if backend didn't return chips
-      renderChips([]);
+      appendBot(reply.replace(/\n/g, '<br>'));
     }
-  }catch(e){
+
+    renderChips(data.chips || ["Top colleges", "Fees?", "Shortlist me"]);
+  } catch (err) {
     removeTyping();
-    appendBot("Service error. Please try again later.");
-    console.error("chat error:", e);
-  }finally{
+    appendBot("Sorry, I'm having trouble connecting. Try again.");
+  } finally {
     awaiting = false;
   }
 }
 
-/* ================ LEAD MODAL ================ */
-function openLeadModal(){ leadModal.style.display = "flex"; leadName.focus(); }
-function closeLeadModal(){ leadModal.style.display = "none"; }
-document.getElementById("leadCancel").onclick = ()=>{ closeLeadModal(); appendBot("No problem — ask me anything else."); };
-
-document.getElementById("leadSubmit").onclick = async () => {
-  const name = leadName.value.trim();
-  const phone = (leadPhone.value || "").trim().replace(/\D/g,"");
-  if(!name){ alert("Enter your name"); leadName.focus(); return; }
-  if(!/^\d{10,15}$/.test(phone)){ alert("Enter valid WhatsApp number"); leadPhone.focus(); return; }
-
-  closeLeadModal();
-  appendUser(`${name} • ${phone}`);
-  messages.push({ role:"user", content:`Lead: ${name} | ${phone}` });
-  saveState();
-
-  showTyping();
-  try{
-    await fetch(LEAD_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name, phone, firstMessage: lastIntent || "", conversation: messages, timestamp: new Date().toISOString()
-      })
-    });
-    removeTyping();
-    appendBot("Thanks — our counselor will contact you on WhatsApp.");
-    messages.push({ role:"assistant", content: "Thanks — our counselor will contact you on WhatsApp." });
-    saveState();
-    // reset to category chips for fresh flow
-    lastIntent = null;
-    showInitialCategories();
-  }catch(err){
-    removeTyping();
-    appendBot("Lead submission failed. Try again later.");
-    console.error("lead error:", err);
-  }
-};
-
-/* ================ UI BINDINGS ================ */
-sendBtn.onclick = ()=> {
-  const text = inputField.value.trim();
-  if(!text) return;
-  inputField.value = "";
-  submitUser(text);
-};
-inputField.addEventListener("keypress", e => { if(e.key === "Enter") sendBtn.click(); });
-
-document.getElementById("close").onclick = ()=> {
-  if(window.parent && window.parent !== window) window.parent.postMessage({ type: "close-lightbox" }, "*");
-  else document.querySelector('.container').style.display = 'none';
-};
-
-/* ================ Persistence + init ================ */
-function restoreConversation(){
-  const saved = loadState();
-  if(!saved || !Array.isArray(saved) || saved.length === 0){
-    // fresh: show greeting + initial categories
-    appendBot("Hi! Choose a category to begin.");
-    showInitialCategories();
-    return;
-  }
-  messages = saved;
-  messages.forEach(m => {
-    if(m.role === "user") appendUser(m.content);
-    else appendBot(m.content);
-  });
-  // request fresh chips? show initial categories for context or leave chips blank
-  // Best: show categories again so user can pick another flow quickly
-  showInitialCategories();
+// Lead Modal
+function openLeadModal() {
+  document.getElementById("leadModal").style.display = "flex";
+  document.getElementById("leadName").focus();
+}
+function closeLeadModal() {
+  document.getElementById("leadModal").style.display = "none";
 }
 
-/* run */
-restoreConversation();
+document.getElementById("leadSubmit").onclick = async () => {
+  const name = document.getElementById("leadName").value.trim();
+  const phone = document.getElementById("leadPhone").value.replace(/\D/g, "");
+  if (!name || phone.length < 10) {
+    alert("Please fill name & valid number");
+    return;
+  }
+  closeLeadModal();
+  appendBot("Thank you! Our counselor will contact you on WhatsApp shortly 🚀");
+  // Send lead to your backend
+  await fetch(LEAD_URL, { method: "POST", body: JSON.stringify({ name, phone, messages, lastIntent }) });
+};
+
+// Input handlers
+sendBtn.onclick = () => submit(inputField.value);
+inputField.addEventListener("keypress", e => { if (e.key === "Enter") submit(inputField.value); });
+
+// Init
+const saved = localStorage.getItem(STORAGE_KEY);
+if (saved) {
+  messages = JSON.parse(saved);
+  messages.forEach(m => m.role === "user" ? appendUser(m.content) : appendBot(m.content.replace(/\n/g, '<br>')));
+  renderChips(["Online MBA", "Fees?", "Shortlist me"]);
+} else {
+  appendBot("Hi! I'm your MBA Counselor for working professionals in India.<br>Ask anything — fees, colleges, eligibility...");
+  renderChips(["Online MBA", "Executive MBA", "Top colleges", "Fees under 4L", "Shortlist me"]);
+}
+
+document.getElementById("close").onclick = () => {
+  if (window.parent !== window) window.parent.postMessage({type:"close-lightbox"},"*");
+};
+
+function handleTileAction(action) {
+  if (/(shortlist|apply|interested)/i.test(action)) openLeadModal();
+  else submit(action);
+}
 </script>
 </body>
 </html>
