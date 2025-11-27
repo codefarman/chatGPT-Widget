@@ -8,7 +8,7 @@ import axios from "axios";
 dotenv.config();
 
 // --- Config / env ---
-const DEFAULT_ALLOWED_ORIGINS = ["http://127.0.0.1:3000", "http://localhost:3000"];
+const DEFAULT_ALLOWED_ORIGINS = ["http://127.0.0.1:3000", "http://localhost:3000" , "chat-gpt-widget-three.vercel.app"];
 let ALLOWED_ORIGINS = DEFAULT_ALLOWED_ORIGINS;
 if (process.env.ALLOWED_ORIGINS) {
   try {
