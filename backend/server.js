@@ -277,7 +277,7 @@ Be careful: output JSON only.
       model: "gpt-4o-mini",
       messages: payloadMessages,
       temperature: 0.0,
-      max_tokens: 1000,
+      max_tokens: 10000,
     });
 
     const elapsed = Date.now() - startTime;
