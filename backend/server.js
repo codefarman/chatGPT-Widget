@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 const corsOptions = {
-    origin: 'http://127.0.0.1:3000/', 
+    origin: 'http://127.0.0.1:3000', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 };
