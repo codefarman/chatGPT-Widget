@@ -1,314 +1,845 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>AI MBA Counselor — Enhanced Widget</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI Chat Widget — Enhanced UX</title>
 <style>
 :root{
-  --accent:#0b76ff; --accent2:#00c2ff; --bg:#f4f8ff; --muted:#64748b;
-  --radius:14px; --shadow:0 18px 48px rgba(8,30,60,0.08);
+  --accent:#0b76ff; --accent-dark:#0962d9; --muted:#6b7280; --bg:#f0f4ff; 
+  --card:#fff; --user:#dafbd8; --bot:#f3f4f6; --maxw:480px; 
+  --shadow:0 12px 40px rgba(8,30,60,0.12); --radius:16px;
+  --gradient-primary:linear-gradient(135deg, #0b76ff 0%, #00c2ff 100%);
+  --gradient-soft:linear-gradient(135deg, rgba(11,118,255,0.08), rgba(0,194,255,0.08));
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#06202a}
-.container{display:flex;align-items:center;justify-content:center;height:100vh;padding:18px}
-.widget{width:100%;max-width:430px;height:94vh;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(11,118,255,0.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,Arial;
+  background:linear-gradient(180deg, #e6f0ff 0%, #f7fbff 100%);
+  color:#0a1f2e;
+  line-height:1.5;
+}
+.container{
+  width:100%;height:100vh;display:flex;align-items:center;
+  justify-content:center;padding:20px;
+}
+.card{
+  width:100%;max-width:var(--maxw);height:100%;max-height:880px;
+  background:var(--card);border-radius:20px;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;
+  overflow:hidden;border:1px solid rgba(11,118,255,0.1);
+}
 
-/* header */
-.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #eef4fb;background:linear-gradient(90deg, rgba(11,118,255,0.04), transparent)}
-.logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-.hmeta .title{font-weight:700}
-.hmeta .subtitle{font-size:12px;color:var(--muted)}
+/* ====== HEADER ====== */
+.header{
+  background:var(--gradient-primary);color:#fff;
+  padding:18px 16px;display:flex;align-items:center;gap:12px;
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;inset:0;
+  background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100"><circle cx="350" cy="20" r="60" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="80" r="40" fill="rgba(255,255,255,0.08)"/></svg>');
+  opacity:0.4;pointer-events:none;
+}
+.logo{
+  width:48px;height:48px;border-radius:12px;
+  background:rgba(255,255,255,0.25);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:20px;z-index:1;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.hmeta{z-index:1}
+.hmeta .title{font-weight:700;font-size:17px;letter-spacing:-0.3px}
+.hmeta .subtitle{font-size:13px;opacity:0.9;margin-top:2px}
+#close{
+  margin-left:auto;z-index:1;border:none;
+  background:rgba(255,255,255,0.2);color:#fff;
+  width:32px;height:32px;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:all 0.2s;
+}
+#close:hover{background:rgba(255,255,255,0.3);transform:scale(1.05)}
 
-/* messages */
-.messages{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent)}
-.msg{max-width:82%;padding:12px 14px;border-radius:12px;line-height:1.4;word-break:break-word;box-shadow:0 2px 0 rgba(9,30,60,0.02)}
-.msg.bot{background:#f3f4f6;align-self:flex-start}
-.msg.user{background:#dff9e1;align-self:flex-end}
-.msg .time{font-size:11px;color:var(--muted);margin-top:6px}
+/* ====== CATEGORY CHIPS (TOP) ====== */
+.categoryRow{
+  padding:14px 12px;background:var(--gradient-soft);
+  border-bottom:1px solid rgba(11,118,255,0.1);
+  display:flex;gap:8px;overflow-x:auto;
+  scrollbar-width:none;
+}
+.categoryRow::-webkit-scrollbar{display:none}
+.catChip{
+  padding:10px 16px;border-radius:999px;
+  background:#fff;border:2px solid rgba(11,118,255,0.2);
+  cursor:pointer;font-size:13px;font-weight:600;
+  white-space:nowrap;transition:all 0.3s;
+  color:var(--accent);flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.catChip::before{
+  content:'';position:absolute;inset:0;
+  background:var(--gradient-primary);opacity:0;
+  transition:opacity 0.3s;
+}
+.catChip:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(11,118,255,0.25);
+  border-color:var(--accent);
+}
+.catChip:hover::before{opacity:1}
+.catChip span{position:relative;z-index:1;transition:color 0.3s}
+.catChip:hover span{color:#fff}
+.catChip.active{
+  background:var(--gradient-primary);color:#fff;
+  border-color:transparent;box-shadow:0 4px 16px rgba(11,118,255,0.3);
+}
+.catChip.active span{color:#fff}
 
-/* chips area (wrap, used both for initial categories and later chips) */
-.chips-area{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px dashed #eef4fb;background:linear-gradient(180deg,transparent,rgba(11,118,255,0.03))}
-.chip{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid rgba(11,118,255,0.06);cursor:pointer;box-shadow:0 6px 16px rgba(12,34,75,0.02);transition:transform .12s ease;font-size:13px}
-.chip:hover{transform:translateY(-3px)}
-.chip.primary{background:var(--accent);color:#fff;border:none;box-shadow:0 12px 30px rgba(11,118,255,0.12)}
+/* ====== SUB-OPTIONS CHIPS ====== */
+.subRow{
+  padding:12px;background:linear-gradient(180deg, #fafcff 0%, transparent 100%);
+  border-bottom:1px solid #f0f4f9;display:flex;gap:8px;
+  flex-wrap:wrap;max-height:160px;overflow-y:auto;
+  scrollbar-width:thin;
+}
+.subRow::-webkit-scrollbar{width:4px}
+.subRow::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px}
+.subChip{
+  padding:9px 14px;border-radius:999px;
+  background:#fff;border:1.5px solid #e6eefc;
+  cursor:pointer;font-size:13px;font-weight:500;
+  transition:all 0.25s;color:#334155;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.subChip::before{
+  content:'→';opacity:0;transform:translateX(-4px);
+  transition:all 0.25s;font-size:12px;
+}
+.subChip:hover{
+  background:var(--accent);color:#fff;
+  border-color:var(--accent);
+  transform:translateX(2px);
+  box-shadow:0 4px 14px rgba(11,118,255,0.3);
+}
+.subChip:hover::before{opacity:1;transform:translateX(0)}
 
-/* controls */
-.controls{display:flex;gap:8px;padding:12px;border-top:1px solid #eef4fb;background:var(--bg);align-items:center}
-.input{flex:1;padding:10px;border-radius:10px;border:1px solid #e6eefc;font-size:14px}
-.send{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+/* ====== MESSAGES ====== */
+.messages{
+  flex:1;padding:16px 12px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
+}
+.messages::-webkit-scrollbar{width:5px}
+.messages::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.msg{
+  max-width:85%;padding:12px 16px;border-radius:16px;
+  line-height:1.4;word-break:break-word;
+  animation:fadeIn 0.4s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.bot{
+  background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  align-self:flex-start;border:1px solid #e6eefc;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.msg.user{
+  background:linear-gradient(135deg, #dafbd8 0%, #c3f7c0 100%);
+  align-self:flex-end;color:#0a4a1f;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+.time{font-size:10px;color:var(--muted);margin-top:6px;opacity:0.8}
 
-/* modal */
-.modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.36);display:none;align-items:center;justify-content:center;z-index:60}
-.modal{width:92%;max-width:420px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 20px 60px rgba(8,30,60,0.22)}
-.field{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.field input{padding:10px;border-radius:8px;border:1px solid #e6eefc;font-size:14px}
-.small{font-size:12px;color:var(--muted)}
+/* ====== QUICK ACTION CHIPS ====== */
+.quickRow{
+  padding:10px 12px;background:#fafcff;
+  border-top:1px solid #f0f4f9;display:flex;gap:8px;
+  flex-wrap:wrap;
+}
+.quickChip{
+  padding:8px 14px;border-radius:999px;
+  background:#fff;border:1.5px solid #e0e9f7;
+  cursor:pointer;font-size:12px;color:#475569;
+  transition:all 0.25s;font-weight:500;
+}
+.quickChip:hover{
+  background:#eff6ff;border-color:#bfdbfe;
+  transform:translateY(-1px);
+}
+.quickChip.cta{
+  background:var(--gradient-primary);color:#fff;
+  border:none;font-weight:700;
+  box-shadow:0 4px 12px rgba(11,118,255,0.35);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.03)}
+}
+.quickChip.cta:hover{
+  box-shadow:0 6px 20px rgba(11,118,255,0.45);
+  transform:translateY(-2px) scale(1.03);
+}
 
-/* typing */
-.typing{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;background:#eaf2ff}
-.dot{width:6px;height:6px;border-radius:50%;background:#94a3b8;margin:0 3px;opacity:0.7;animation:blink 1s infinite}
-@keyframes blink{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}
+/* ====== CONTROLS (OPTIONAL INPUT) ====== */
+.controls{
+  display:flex;gap:8px;padding:12px;
+  border-top:1px solid #eef4fb;align-items:center;
+  background:var(--card);
+}
+.input{
+  flex:1;padding:11px 14px;border-radius:12px;
+  border:1.5px solid #e6eefc;font-size:14px;
+  transition:all 0.25s;
+}
+.input:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(11,118,255,0.1);
+}
+.send{
+  background:var(--gradient-primary);color:#fff;
+  padding:11px 20px;border-radius:12px;border:none;
+  cursor:pointer;font-weight:700;font-size:14px;
+  transition:all 0.25s;box-shadow:0 4px 12px rgba(11,118,255,0.3);
+}
+.send:hover{
+  box-shadow:0 6px 18px rgba(11,118,255,0.4);
+  transform:translateY(-1px);
+}
+.send:active{transform:translateY(0)}
+
+/* ====== FOOTER ====== */
+.footer{
+  padding:10px 14px;border-top:1px solid #f0f4f9;
+  text-align:center;font-size:11px;color:var(--muted);
+  background:linear-gradient(180deg, transparent, rgba(11,118,255,0.02));
+}
+.footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.footer a:hover{text-decoration:underline}
+
+/* ====== MODAL ====== */
+.modalBack{
+  position:fixed;inset:0;background:rgba(2,6,23,0.5);
+  backdrop-filter:blur(4px);display:none;align-items:center;
+  justify-content:center;z-index:100;animation:fadeIn 0.3s;
+}
+.modal{
+  width:92%;max-width:400px;background:#fff;
+  padding:24px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  animation:slideUp 0.3s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal h3{margin-bottom:6px;color:#0a1f2e;font-size:20px}
+.modal .small{font-size:13px;color:var(--muted);margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.field label{font-weight:600;font-size:13px;color:#334155}
+.field input{
+  padding:11px 14px;border-radius:10px;
+  border:1.5px solid #e6eefc;font-size:14px;
+  transition:all 0.25s;
+}
+.field input:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(11,118,255,0.1);
+}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.modal-actions button{
+  padding:10px 20px;border-radius:10px;
+  font-weight:600;cursor:pointer;font-size:14px;
+  transition:all 0.25s;
+}
+#leadCancel{
+  background:transparent;border:1.5px solid #e2e8f0;
+  color:#64748b;
+}
+#leadCancel:hover{background:#f8fafc;border-color:#cbd5e1}
+
+/* ====== TYPING INDICATOR ====== */
+.typing{
+  display:inline-flex;align-items:center;
+  padding:10px 14px;border-radius:12px;
+  background:linear-gradient(135deg, #eff6ff, #dbeafe);
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#60a5fa;margin:0 3px;
+  animation:blink 1.2s infinite;
+}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes blink{
+  0%,100%{opacity:0.3;transform:scale(0.8)}
+  50%{opacity:1;transform:scale(1.1)}
+}
+
+/* ====== RESPONSIVE ====== */
+@media(max-width:500px){
+  .card{max-height:100%;border-radius:0}
+  .container{padding:0}
+  .catChip{font-size:12px;padding:8px 12px}
+  .subChip{font-size:12px;padding:8px 12px}
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="widget" role="application" aria-label="MBA Counselor chat widget">
+  <div class="card" role="application">
 
+    <!-- HEADER -->
     <div class="header">
       <div class="logo">AI</div>
       <div class="hmeta">
         <div class="title">MBA Counselor</div>
-        <div class="subtitle">Tap a category or ask — chips come from AI</div>
+        <div class="subtitle">Click categories to explore</div>
       </div>
-      <button id="close" style="margin-left:auto;border:none;background:transparent;cursor:pointer;color:var(--muted)">✕</button>
+      <button id="close">✕</button>
     </div>
 
+    <!-- CATEGORY CHIPS (Always visible at top) -->
+    <div id="categoryRow" class="categoryRow"></div>
+
+    <!-- SUB-OPTIONS CHIPS (Appear when category selected) -->
+    <div id="subRow" class="subRow" style="display:none"></div>
+
+    <!-- MESSAGES -->
     <div id="messages" class="messages" aria-live="polite"></div>
 
-    <!-- chips area shared for categories + AI chips -->
-    <div id="chipsArea" class="chips-area" aria-hidden="false"></div>
+    <!-- QUICK ACTION CHIPS (Dynamic CTAs) -->
+    <div id="quickRow" class="quickRow"></div>
 
+    <!-- CONTROLS (Optional typing) -->
     <div class="controls">
-      <input id="inputField" class="input" placeholder="Type or tap chips"/>
-      <button id="sendBtn" class="send">Send</button>
+      <input id="input" class="input" placeholder="Or type your question..." aria-label="Message input"/>
+      <button id="send" class="send">Send</button>
+    </div>
+
+    <div class="footer">
+      Tap chips for quick answers • <a href="#">Privacy</a>
     </div>
   </div>
 </div>
 
-<!-- Lead modal -->
-<div id="leadModal" class="modal-back" role="dialog" aria-modal="true">
+<!-- LEAD MODAL -->
+<div id="leadModal" class="modalBack" role="dialog" aria-modal="true">
   <div class="modal">
-    <h3>Quick details</h3>
-    <p class="small">We'll share shortlisted programs on WhatsApp.</p>
+    <h3>🎓 Get Personalized Guidance</h3>
+    <p class="small">Share your details and we'll send shortlisted programs to WhatsApp</p>
     <div class="field">
-      <label>Name</label>
-      <input id="leadName" placeholder="Your name"/>
+      <label>Full Name</label>
+      <input id="leadName" type="text" placeholder="Enter your name" />
     </div>
     <div class="field">
-      <label>WhatsApp number</label>
-      <input id="leadPhone" placeholder="e.g. 9876543210"/>
+      <label>WhatsApp Number</label>
+      <input id="leadPhone" type="tel" placeholder="e.g., 9876543210" />
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button id="leadCancel" style="background:transparent;border:none;cursor:pointer">Cancel</button>
+    <div class="modal-actions">
+      <button id="leadCancel">Cancel</button>
       <button id="leadSubmit" class="send">Submit</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const BACKEND_URL = "https://chatgpt-widget.onrender.com"; // <-- set your deployed backend
-const CHAT_URL = BACKEND_URL + "/chat";
-const LEAD_URL = BACKEND_URL + "/lead";
-const STORAGE_KEY = "mba_widget_conversation_v1";
+/* ====== CONFIG ====== */
+const BACKEND_URL = "https://chatgpt-widget.onrender.com";
+const CHAT_ENDPOINT = BACKEND_URL + "/chat";
+const LEAD_ENDPOINT = BACKEND_URL + "/lead";
 
-/* ================ STATE ================ */
-let messages = [];           // conversation messages (role + content)
-let awaiting = false;        // awaiting backend
-let lastIntent = null;       // last high-intent message
+/* ====== STATE ====== */
+let messages = [];
+let awaiting = false;
+let selectedCategory = null;
+let highIntent = false;
+let lastIntentText = null;
 
-/* ================ DOM ================ */
+/* ====== UI REFS ====== */
 const messagesEl = document.getElementById("messages");
-const chipsArea = document.getElementById("chipsArea");
-const inputField = document.getElementById("inputField");
-const sendBtn = document.getElementById("sendBtn");
+const categoryRow = document.getElementById("categoryRow");
+const subRow = document.getElementById("subRow");
+const quickRow = document.getElementById("quickRow");
+const inputEl = document.getElementById("input");
+const sendBtn = document.getElementById("send");
 const leadModal = document.getElementById("leadModal");
 const leadName = document.getElementById("leadName");
 const leadPhone = document.getElementById("leadPhone");
+const leadSubmit = document.getElementById("leadSubmit");
+const leadCancel = document.getElementById("leadCancel");
 
-/* ================ UTILS ================ */
+/* ====== UTILS ====== */
 function now(){ return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
 function esc(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
-function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); }catch(e){} }
-function loadState(){ try{ const j = localStorage.getItem(STORAGE_KEY); return j ? JSON.parse(j) : null; }catch(e){ return null; } }
-
-/* ================ MESSAGE RENDER ================ */
-function appendBot(text){
-  const d = document.createElement("div"); d.className="msg bot";
-  d.innerHTML = `<div>${formatReply(text)}</div><div class="time">${now()}</div>`;
-  messagesEl.appendChild(d); messagesEl.scrollTop = messagesEl.scrollHeight;
+function appendUser(t){
+  const div = document.createElement("div");
+  div.className = "msg user";
+  div.innerHTML = `<div>${esc(t)}</div><div class="time">${now()}</div>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
-function appendUser(text){
-  const d = document.createElement("div"); d.className="msg user";
-  d.innerHTML = `<div>${esc(text)}</div><div class="time">${now()}</div>`;
-  messagesEl.appendChild(d); messagesEl.scrollTop = messagesEl.scrollHeight;
+function appendBot(t){
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.innerHTML = `<div>${esc(t)}</div><div class="time">${now()}</div>`;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
-function formatReply(text){
-  if(!text) return "";
-  // If reply contains list markers or newlines, preserve formatting
-  if(/\n|^(\d+\)|\d+\.)|^- /m.test(text)){
-    // convert newlines to <br> and keep bullets
-    const html = esc(text).replace(/\n/g,"<br/>").replace(/\u2022/g,"•");
-    return html;
-  }
-  // short reply: escape normally
-  return esc(text);
-}
-
-/* typing indicator */
 function showTyping(){
-  const el = document.createElement("div"); el.className="msg bot"; el.id="typing";
+  const el = document.createElement("div");
+  el.id = "typing";
+  el.className = "msg bot";
   el.innerHTML = `<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
   messagesEl.appendChild(el); messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 function removeTyping(){ const t = document.getElementById("typing"); if(t) t.remove(); }
 
-/* ================ CHIPS ================ */
-/* Render chips (provided by backend). If backend returns zero chips, we show a single fallback 'Apply now' chip. */
-function renderChips(list){
-  chipsArea.innerHTML = "";
-  const items = Array.isArray(list) ? list : [];
-  items.forEach(text => {
-    const el = document.createElement("div");
-    el.className = "chip";
-    el.textContent = text;
-    if(/apply|interested|shortlist/i.test(text)){
-      el.classList.add("primary");
-      el.onclick = () => openLeadModal();
-    } else {
-      el.onclick = () => submitUser(text);
-    }
-    chipsArea.appendChild(el);
+/* ====== CATEGORY & SUB-OPTIONS DATA ====== */
+const CATEGORIES = [
+  { name: "Executive MBA", icon: "💼" },
+  { name: "Online MBA", icon: "💻" },
+  { name: "Offline MBA", icon: "🎓" },
+  { name: "Study Abroad", icon: "✈️" },
+  { name: "Certifications", icon: "📜" }
+];
+
+const SUB_OPTIONS = {
+  "Executive MBA": ["Part-time format", "Weekend batches", "Top colleges", "Fees range", "Admission process"],
+  "Online MBA": ["1-year program", "2-year program", "Best colleges", "Fee structure", "Scholarships"],
+  "Offline MBA": ["Full-time MBA", "Part-time MBA", "Top B-schools", "Placements", "Fee details"],
+  "Study Abroad": ["Top countries", "Cost estimate", "Scholarships", "Admission help", "Eligibility"],
+  "Certifications": ["Analytics", "Finance", "Digital Marketing", "Duration", "Career value"]
+};
+
+/* ====== QUICK ACTION CHIPS (Default) ====== */
+const DEFAULT_QUICK = ["Fees?","Eligibility?","Best MBA?","Placement stats?"];
+
+/* ====== RENDER CATEGORY CHIPS ====== */
+function renderCategories(){
+  console.log(" renderCategories called");
+  console.log(" Categories to render:", CATEGORIES);
+  
+  categoryRow.innerHTML = "";
+  
+  CATEGORIES.forEach((cat, index) => {
+    console.log(`  Creating category ${index + 1}:`, cat.name);
+    const chip = document.createElement("div");
+    chip.className = "catChip";
+    chip.innerHTML = `<span>${cat.icon} ${cat.name}</span>`;
+    chip.onclick = () => {
+      console.log(" Category chip clicked:", cat.name);
+      selectCategory(cat.name);
+    };
+    categoryRow.appendChild(chip);
   });
-  if(items.length === 0){
-    const fallback = document.createElement("div");
-    fallback.className = "chip primary"; fallback.textContent = "Apply now";
-    fallback.onclick = openLeadModal;
-    chipsArea.appendChild(fallback);
-  }
+  
+  console.log("✓ Categories rendered:", categoryRow.children.length, "chips");
 }
 
-/* ================ INITIAL CATEGORIES ================ */
-/* Categories appear below initial bot message as chips — still come from frontend but are the initial choices only */
-const INITIAL_CATEGORIES = ["Online MBA","Executive MBA","Offline MBA","Study Abroad","Certifications"];
-function showInitialCategories(){
-  renderChips(INITIAL_CATEGORIES);
+/* ====== SELECT CATEGORY ====== */
+function selectCategory(name){
+  console.log(" Category selected:", name);
+  
+  // Mark as selected
+  selectedCategory = name;
+  console.log(" Updated selectedCategory state:", selectedCategory);
+  
+  // Update active state
+  Array.from(categoryRow.children).forEach(c => {
+    c.classList.toggle("active", c.textContent.includes(name));
+  });
+  console.log(" Updated active visual state for category chips");
+  
+  // Show user selection
+  appendUser(name);
+  messages.push({ role:"user", content: name });
+  console.log(" Added user message to conversation:", messages.length, "messages total");
+  
+  // Render sub-options
+  const subs = SUB_OPTIONS[name] || [];
+  console.log(" Rendering sub-options:", subs);
+  renderSubOptions(subs);
+  
+  // Send to AI
+  highIntent = false;
+  console.log(" Sending to AI...");
+  sendToChat();
 }
 
-/* ================ BACKEND COMMUNICATION ================ */
-async function submitUser(text){
-  if(awaiting) return;
-  appendUser(text);
-  messages.push({ role:"user", content:text });
-  saveState();
-
-  // check intent keywords (for lead prompts)
-  if (/(fee|fees|admission|apply|eligibility|placement|interested|shortlist|list|give list|top colleges)/i.test(text)){
-    lastIntent = text;
+/* ====== RENDER SUB-OPTIONS ====== */
+function renderSubOptions(list){
+  console.log(" renderSubOptions called with:", list);
+  
+  if(!list || list.length === 0){
+    console.log(" No sub-options to render, hiding subRow");
+    subRow.style.display = "none";
+    return;
   }
+  
+  console.log(" Rendering", list.length, "sub-option chips");
+  subRow.style.display = "flex";
+  subRow.innerHTML = "";
+  
+  list.forEach((opt, index) => {
+    console.log(`  Creating chip ${index + 1}:`, opt);
+    const chip = document.createElement("div");
+    chip.className = "subChip";
+    chip.textContent = opt;
+    chip.onclick = () => {
+      console.log(" Sub-option clicked:", opt);
+      handleChipClick(opt);
+    };
+    subRow.appendChild(chip);
+  });
+  
+  console.log("✓ Sub-options rendered successfully");
+}
 
-  awaiting = true;
+/* ====== RENDER QUICK CHIPS ====== */
+function renderQuickChips(list, includeCTA = false){
+  console.log(" renderQuickChips called");
+  console.log("  List:", list);
+  console.log("  Include CTA?", includeCTA);
+  
+  quickRow.innerHTML = "";
+  
+  list.forEach((text, index) => {
+    console.log(`  Creating quick chip ${index + 1}:`, text);
+    const chip = document.createElement("div");
+    chip.className = "quickChip";
+    chip.textContent = text;
+    chip.onclick = () => {
+      console.log(" Quick chip clicked:", text);
+      handleChipClick(text);
+    };
+    quickRow.appendChild(chip);
+  });
+  
+  if(includeCTA){
+    console.log("  Adding CTA button");
+    const cta = document.createElement("div");
+    cta.className = "quickChip cta";
+    cta.textContent = " I'm Interested!";
+    cta.onclick = () => {
+      console.log(" CTA button clicked! Opening lead modal");
+      openLeadModal();
+    };
+    quickRow.prepend(cta);
+    console.log("  ✓ CTA button added");
+  }
+  
+  console.log("✓ Quick chips rendered:", quickRow.children.length, "total chips");
+}
+
+/* ====== HANDLE CHIP CLICK ====== */
+function handleChipClick(text){
+  console.log(" Chip clicked:", text);
+  
+  // Check if it's a lead trigger
+  const isLeadTrigger = /apply|interested|contact|talk|counselor/i.test(text);
+  console.log(" Is lead trigger?", isLeadTrigger);
+  
+  if(isLeadTrigger){
+    console.log(" Opening lead modal");
+    openLeadModal();
+    return;
+  }
+  
+  // Normal message
+  console.log(" Processing as normal message");
+  handleUserMessage(text);
+}
+
+/* ====== DETECT HIGH-INTENT ====== */
+const INTENT_KEYWORDS = ["fee","fees","cost","admission","apply","eligibility","scholarship","placement","interested","contact","counselor"];
+function detectIntent(txt){
+  const s = txt.toLowerCase();
+  return INTENT_KEYWORDS.some(k => s.includes(k));
+}
+
+/* ====== SEND TO CHAT ====== */
+async function sendToChat(){
+  if(awaiting) {
+    console.warn(" Already awaiting response, ignoring request");
+    return;
+  }
+  console.log(" sendToChat() called");
+  console.log(" Current messages array:", JSON.stringify(messages, null, 2));
+  
+  awaiting = true; 
+  disableControls(true);
+  console.log(" Controls disabled, awaiting = true");
+  
   showTyping();
-
+  console.log(" Typing indicator shown");
+  
   try{
-    const res = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    console.log(" Fetching from:", CHAT_ENDPOINT);
+    console.log(" Request payload:", { messages });
+    
+    const res = await fetch(CHAT_ENDPOINT, {
+      method: "POST", 
+      headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ messages })
     });
-    const data = await res.json();
-    removeTyping();
-    const reply = (data?.reply ?? "Sorry, I couldn't process that.").trim();
-
-    // push assistant message to messages and save
-    messages.push({ role:"assistant", content: reply });
-    saveState();
-
-    // append reply (format preserves newline/lists)
-    appendBot(reply);
-
-    // render chips from backend (dynamic)
-    if (Array.isArray(data?.chips)){
-      renderChips(data.chips);
-    } else {
-      // fallback if backend didn't return chips
-      renderChips([]);
+    
+    console.log(" Response status:", res.status, res.statusText);
+    
+    if(!res.ok) {
+      console.error(" Response not OK:", res.status);
+      throw new Error("chat failed "+res.status);
     }
-  }catch(e){
+    
+    const data = await res.json();
+    console.log(" Response data received:", data);
+    
     removeTyping();
-    appendBot("Service error. Please try again later.");
-    console.error("chat error:", e);
+    console.log(" Typing indicator removed");
+    
+    const reply = (data.reply || "Sorry, please try again").trim();
+    console.log(" Bot reply:", reply);
+    
+    appendBot(reply);
+    messages.push({ role:"assistant", content: reply });
+    console.log(" Bot message added. Total messages:", messages.length);
+
+    // Show CTA chips after high-intent reply
+    if(highIntent){
+      console.log(" High intent detected, showing CTA chips in 400ms");
+      setTimeout(() => {
+        console.log(" Rendering CTA chips now");
+        renderQuickChips(DEFAULT_QUICK, true);
+      }, 400);
+    } else {
+      console.log(" No high intent, skipping CTA chips");
+    }
+  }catch(err){
+    console.error(" Error in sendToChat:", err);
+    console.error("Stack trace:", err.stack);
+    removeTyping();
+    appendBot("Service unavailable. Please try again.");
   }finally{
-    awaiting = false;
+    awaiting = false; 
+    disableControls(false);
+    console.log(" Controls enabled, awaiting = false");
   }
 }
 
-/* ================ LEAD MODAL ================ */
-function openLeadModal(){ leadModal.style.display = "flex"; leadName.focus(); }
-function closeLeadModal(){ leadModal.style.display = "none"; }
-document.getElementById("leadCancel").onclick = ()=>{ closeLeadModal(); appendBot("No problem — ask me anything else."); };
+/* ====== HANDLE USER MESSAGE ====== */
+async function handleUserMessage(text){
+  if(!text) {
+    console.warn(" handleUserMessage called with empty text");
+    return;
+  }
+  console.log(" User message:", text);
+  
+  appendUser(text);
+  messages.push({ role:"user", content: text });
+  console.log(" Message added to conversation. Total:", messages.length);
+  // Detect intent
+  const intentDetected = detectIntent(text);
+  console.log(" Intent detection result:", intentDetected);
+  
+  if(intentDetected){
+    highIntent = true;
+    lastIntentText = text;
+    console.log(" HIGH INTENT detected! Stored:", lastIntentText);
+  } else {
+    console.log(" No high intent keywords found");
+  }
 
-document.getElementById("leadSubmit").onclick = async () => {
-  const name = leadName.value.trim();
-  const phone = (leadPhone.value || "").trim().replace(/\D/g,"");
-  if(!name){ alert("Enter your name"); leadName.focus(); return; }
-  if(!/^\d{10,15}$/.test(phone)){ alert("Enter valid WhatsApp number"); leadPhone.focus(); return; }
+  await sendToChat();
+}
+
+/* ====== CONTROLS ====== */
+sendBtn.addEventListener("click", () => {
+  console.log(" Send button clicked");
+  const v = inputEl.value.trim(); 
+  console.log(" Input value:", v || "(empty)");
+  
+  if(!v) {
+    console.warn(" Empty input, ignoring");
+    return; 
+  }
+  
+  inputEl.value = "";
+  console.log("✓ Input cleared, processing message");
+  handleUserMessage(v);
+});
+
+inputEl.addEventListener("keypress", e => { 
+  if(e.key === "Enter") {
+    console.log(" Enter key pressed in input");
+    sendBtn.click(); 
+  }
+});
+
+document.getElementById("close").addEventListener("click", () => {
+  console.log(" Close button clicked");
+  
+  if(window.parent && window.parent !== window) {
+    console.log(" Posting close message to parent window");
+    window.parent.postMessage({type:"close-lightbox"}, "*");
+  } else {
+    console.log(" Hiding widget container");
+    document.querySelector('.container').style.display = 'none';
+  }
+});
+
+/* ====== LEAD MODAL ====== */
+function openLeadModal(){ 
+  console.log(" Opening lead modal");
+  leadName.value=''; 
+  leadPhone.value=''; 
+  leadModal.style.display='flex'; 
+  leadName.focus(); 
+  console.log(" Lead modal opened");
+}
+
+function closeLeadModal(){ 
+  console.log(" Closing lead modal");
+  leadModal.style.display='none'; 
+  console.log(" Lead modal closed");
+}
+
+leadCancel.addEventListener("click", () => { 
+  console.log(" Lead cancel clicked");
+  closeLeadModal(); 
+  appendBot("No problem! Feel free to explore more options."); 
+});
+
+leadSubmit.addEventListener("click", async () => {
+  console.log(" Lead submit clicked");
+  
+  const name = (leadName.value||"").trim(); 
+  const phone = (leadPhone.value||"").trim().replace(/\D/g,'');
+  
+  console.log(" Lead data:", { name, phone: phone || "(empty)" });
+  
+  if(!name){ 
+    console.warn(" Name validation failed");
+    alert("Please enter your name"); 
+    leadName.focus(); 
+    return; 
+  }
+  
+  if(!/^\d{10,15}$/.test(phone)){ 
+    console.warn(" Phone validation failed:", phone);
+    alert("Please enter a valid phone number"); 
+    leadPhone.focus(); 
+    return; 
+  }
+  
+  console.log(" Validation passed, submitting lead");
 
   closeLeadModal();
   appendUser(`${name} • ${phone}`);
-  messages.push({ role:"user", content:`Lead: ${name} | ${phone}` });
-  saveState();
+  messages.push({ role:"user", content: `Lead captured: ${name} | ${phone}` });
+  console.log(" Lead message added to conversation");
 
-  showTyping();
   try{
-    await fetch(LEAD_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name, phone, firstMessage: lastIntent || "", conversation: messages, timestamp: new Date().toISOString()
-      })
+    awaiting = true; 
+    disableControls(true); 
+    showTyping();
+    console.log(" Submitting to:", LEAD_ENDPOINT);
+    
+    const payload = { 
+      name, phone, 
+      firstMessage: lastIntentText || "", 
+      conversation: messages, 
+      timestamp: new Date().toISOString() 
+    };
+    console.log(" Lead payload:", payload);
+    
+    const r = await fetch(LEAD_ENDPOINT, { 
+      method:"POST", 
+      headers:{"Content-Type":"application/json"}, 
+      body: JSON.stringify(payload) 
     });
+    
+    console.log(" Lead response status:", r.status);
+    
     removeTyping();
-    appendBot("Thanks — our counselor will contact you on WhatsApp.");
-    messages.push({ role:"assistant", content: "Thanks — our counselor will contact you on WhatsApp." });
-    saveState();
-    // reset to category chips for fresh flow
-    lastIntent = null;
-    showInitialCategories();
+    
+    if(!r.ok) {
+      console.error(" Lead submission failed:", r.status);
+      throw new Error("lead failed "+r.status);
+    }
+    
+    console.log(" Lead submitted successfully");
+    appendBot(" Thank you! Our counselor will contact you within 24 hours via WhatsApp.");
+    messages.push({ role:"assistant", content:"Thank you! Our counselor will contact you soon." });
+    
+    highIntent = false; 
+    lastIntentText = null; 
+    console.log(" Reset intent state");
+    
+    renderQuickChips(DEFAULT_QUICK, false);
   }catch(err){
+    console.error(" Lead submission error:", err);
+    console.error("Stack trace:", err.stack);
     removeTyping();
-    appendBot("Lead submission failed. Try again later.");
-    console.error("lead error:", err);
+    appendBot("Submission failed. Please try again.");
+  }finally{ 
+    awaiting=false; 
+    disableControls(false);
+    console.log("✓ Lead submission flow complete"); 
   }
-};
+});
 
-/* ================ UI BINDINGS ================ */
-sendBtn.onclick = ()=> {
-  const text = inputField.value.trim();
-  if(!text) return;
-  inputField.value = "";
-  submitUser(text);
-};
-inputField.addEventListener("keypress", e => { if(e.key === "Enter") sendBtn.click(); });
-
-document.getElementById("close").onclick = ()=> {
-  if(window.parent && window.parent !== window) window.parent.postMessage({ type: "close-lightbox" }, "*");
-  else document.querySelector('.container').style.display = 'none';
-};
-
-/* ================ Persistence + init ================ */
-function restoreConversation(){
-  const saved = loadState();
-  if(!saved || !Array.isArray(saved) || saved.length === 0){
-    // fresh: show greeting + initial categories
-    appendBot("Hi! Choose a category to begin.");
-    showInitialCategories();
-    return;
-  }
-  messages = saved;
-  messages.forEach(m => {
-    if(m.role === "user") appendUser(m.content);
-    else appendBot(m.content);
-  });
-  // request fresh chips? show initial categories for context or leave chips blank
-  // Best: show categories again so user can pick another flow quickly
-  showInitialCategories();
+/* ====== DISABLE CONTROLS ====== */
+function disableControls(b){ 
+  console.log(b ? " Disabling controls" : " Enabling controls");
+  
+  inputEl.disabled=b; 
+  sendBtn.disabled=b; 
+  
+  const allChips = [...categoryRow.children, ...subRow.children, ...quickRow.children];
+  console.log(`  ${b ? '' : '✓'} Setting ${allChips.length} chips pointer-events:`, b ? "none" : "auto");
+  
+  allChips.forEach(c => c.style.pointerEvents = b ? "none" : "auto");
+  
+  console.log("✓ Controls", b ? "disabled" : "enabled");
 }
 
-/* run */
-restoreConversation();
+/* ====== INITIALIZE ====== */
+console.log(" MBA Counselor Widget Initializing...");
+console.log(" Configuration:");
+console.log("  - Backend URL:", BACKEND_URL);
+console.log("  - Chat endpoint:", CHAT_ENDPOINT);
+console.log("  - Lead endpoint:", LEAD_ENDPOINT);
+console.log("  - Categories:", CATEGORIES.length);
+console.log("  - Sub-options configured:", Object.keys(SUB_OPTIONS).length);
+
+appendBot(" Hi! I'm your MBA counselor. Choose a category above to get started!");
+console.log(" Initial greeting added");
+
+renderCategories();
+console.log("✓ Categories rendered");
+
+renderQuickChips(DEFAULT_QUICK, false);
+console.log("✓ Quick chips rendered");
+
+console.log(" Widget initialization complete!");
+console.log(" Initial state:", {
+  messages: messages.length,
+  selectedCategory,
+  highIntent,
+  awaiting
+});
+
+/* ====== DEBUG ====== */
+window._widgetState = () => {
+  const state = { 
+    messages, 
+    selectedCategory, 
+    highIntent,
+    lastIntentText,
+    awaiting,
+    messageCount: messages.length
+  };
+  console.log(" Current Widget State:", state);
+  return state;
+};
+
+console.log(" Debug helper available: window._widgetState()");
+console.log(" Use console to call _widgetState() anytime to see current state");
 </script>
 </body>
 </html>
