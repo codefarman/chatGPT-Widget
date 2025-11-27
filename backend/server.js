@@ -8,7 +8,12 @@ import axios from "axios";
 dotenv.config();
 
 // --- Config / env ---
-const DEFAULT_ALLOWED_ORIGINS = ["http://127.0.0.1:3000", "http://localhost:3000" , "https://chat-gpt-widget-three.vercel.app"];
+const DEFAULT_ALLOWED_ORIGINS = [
+  "http://127.0.0.1:3000",
+  "http://localhost:3000",
+  "https://chat-gpt-widget-three.vercel.app",
+  "chat-gpt-widget-three.vercel.app" 
+];
 let ALLOWED_ORIGINS = DEFAULT_ALLOWED_ORIGINS;
 if (process.env.ALLOWED_ORIGINS) {
   try {
@@ -18,6 +23,33 @@ if (process.env.ALLOWED_ORIGINS) {
     console.warn("ALLOWED_ORIGINS parse failed — using defaults.");
   }
 }
+
+// Normalize allowed origins into a set of hosts (host:port when present)
+// Accept entries that are full origins (with scheme) or plain hostnames.
+function normalizeAllowedHosts(list) {
+  const hosts = new Set();
+  for (const entry of list) {
+    if (!entry) continue;
+    try {
+      if (/^https?:\/\//i.test(entry)) {
+        const u = new URL(entry);
+        hosts.add(u.host); // hostname:port if present
+      } else {
+        // treat as hostname (maybe with port)
+        hosts.add(entry.replace(/\/+$/, "")); // strip trailing slash if any
+      }
+    } catch (e) {
+      // fallback: add the raw entry
+      hosts.add(entry);
+    }
+  }
+  return hosts;
+}
+
+const ALLOWED_HOSTS = normalizeAllowedHosts(ALLOWED_ORIGINS_RAW);
+
+console.log("Allowed hosts (normalized):", Array.from(ALLOWED_HOSTS));
+
 
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 if (!OPENAI_KEY) console.warn("Warning: OPENAI_API_KEY is not set.");
