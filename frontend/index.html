@@ -23,7 +23,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* Header - ChatGPT Style */
 .header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: var(--chat-bg); text-align: center; font-weight: 600; font-size: 17px; position: relative; }
-/* .header::before { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 36px; height: 36px; background: linear-gradient(135deg,#0b76ff,#00c2ff); border-radius: 10px; } */
 .close-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; }
 
 /* Messages */
@@ -94,7 +93,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- Lead Modal -->
 <div id="leadModal" class="modal-back">
   <div class="modal">
-    <h3>🎉 Get Your Shortlist on WhatsApp</h3>
+    <h3>Get Your Shortlist on WhatsApp</h3>
     <p style="color:#64748b;margin:12px 0;font-size:14px;">Our counselor will call you in <5 mins</p>
     <input id="leadName" placeholder="Your Name"/>
     <input id="leadPhone" placeholder="WhatsApp Number" inputmode="numeric"/>
@@ -110,7 +109,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 const BACKEND_URL = "https://chatgpt-widget.onrender.com";
 const CHAT_URL = BACKEND_URL + "/chat";
 const LEAD_URL = BACKEND_URL + "/lead";
-const STORAGE_KEY = "mba_chat_v2";
+const STORAGE_KEY = "mba_chat_v2";   // ← kept just in case you need it later
 
 let messages = [];
 let awaiting = false;
@@ -196,7 +195,9 @@ async function submit(text) {
   appendUser(userMsg);
   inputField.value = "";
   messages.push({ role: "user", content: userMsg });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+
+  // Removed localStorage saving here on purpose
+  // localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
 
   if (/(fee|apply|shortlist|interested|eligibility|placement)/i.test(userMsg)) lastIntent = userMsg;
 
@@ -214,9 +215,9 @@ async function submit(text) {
 
     const reply = (data.reply || "Let me help you with that.").trim();
     messages.push({ role: "assistant", content: reply });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
 
-    // Support rich tiles if backend sends them
+    // Also not saving assistant reply to localStorage
+
     if (data.tiles && Array.isArray(data.tiles)) {
       renderTiles(data.tiles);
     } else {
@@ -250,28 +251,25 @@ document.getElementById("leadSubmit").onclick = async () => {
   }
   closeLeadModal();
   appendBot("Thank you! Our counselor will contact you on WhatsApp shortly 🚀");
-  // Send lead to your backend
-  await fetch(LEAD_URL, { method: "POST", body: JSON.stringify({ name, phone, messages, lastIntent }) });
+  await fetch(LEAD_URL, { 
+    method: "POST", 
+    body: JSON.stringify({ name, phone, messages, lastIntent }) 
+  });
 };
 
 // Input handlers
 sendBtn.onclick = () => submit(inputField.value);
 inputField.addEventListener("keypress", e => { if (e.key === "Enter") submit(inputField.value); });
 
-// Init
-const saved = localStorage.getItem(STORAGE_KEY);
-if (saved) {
-  messages = JSON.parse(saved);
-  messages.forEach(m => m.role === "user" ? appendUser(m.content) : appendBot(m.content.replace(/\n/g, '<br>')));
-  renderChips(["Online MBA", "Fees?", "Shortlist me"]);
-} else {
-  appendBot("Hi! I'm your MBA Counselor for working professionals in India.<br>Ask anything — fees, colleges, eligibility...");
-  renderChips(["Online MBA", "Executive MBA", "Offline MBA", "Study Abroad", "Certifications"] );
-}
+// ==================== INITIALIZATION – ALWAYS START FRESH ====================
+localStorage.removeItem(STORAGE_KEY);  // This forces a clean slate on every load
 
-document.getElementById("close").onclick = () => {
-  if (window.parent !== window) window.parent.postMessage({type:"close-lightbox"},"*");
-};
+messages = [];  // Ensure messages array is empty
+msgs.innerHTML = "";  // Clear any old DOM messages
+
+// Fresh welcome message every time
+appendBot("Hi! I'm your MBA Counselor for working professionals in India.<br>Ask anything — fees, colleges, eligibility...");
+renderChips(["Online MBA", "Executive MBA", "Offline MBA", "Study Abroad", "Certifications"]);
 
 function handleTileAction(action) {
   if (/(shortlist|apply|interested)/i.test(action)) openLeadModal();
