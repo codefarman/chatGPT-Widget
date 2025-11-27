@@ -3,10 +3,17 @@ import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
+
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+    origin: 'http://127.0.0.1:3000/frontend/index.html', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+};
+
+app.use(cors(corsOptions)); 
 app.use(express.json());
 
 // OpenAI Client
