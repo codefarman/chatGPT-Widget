@@ -176,38 +176,62 @@ function isConversionChip(text) {
   return /(apply|shortlist|interested)/i.test(text);
 }
 
-// Normalize chips, ensure 1-4 words, up to 6, add Yes/No when assistant asks a direct question
+// Improved renderChips: always ensure 1-6 useful chips, add Yes/No when needed
 function renderChips(chipsFromServer, lastReplyText) {
-  let chips = Array.isArray(chipsFromServer) ? chipsFromServer.slice() : [];
+  // normalize input
+  let chips = Array.isArray(chipsFromServer) ? chipsFromServer.map(c => String(c).trim()).filter(Boolean) : [];
 
-  chips = chips.map(c => c.toString().trim()).filter(Boolean);
+  // If server returned nothing or only trivial chips, build fallback chips from the reply
+  const buildFallback = (reply) => {
+    const fallback = [];
+    const r = (reply || "").toLowerCase();
 
-  const yesNoPattern = /(would you like|want more details|want more|more details|do you want|yes or no|would you like more)/i;
-  if (lastReplyText && yesNoPattern.test(lastReplyText)) {
-    if (!chips.some(c => /^Yes$/i.test(c))) chips.unshift("Yes");
-    if (!chips.some(c => /^No$/i.test(c))) chips.splice(1, 0, "No");
+    if (/fee|cost|₹|costs|price|scholarship/.test(r)) fallback.push("Fees?", "Scholarship options");
+    if (/college|top colleges|top mba|top colleges in|list|give list/.test(r)) fallback.push("Top colleges", "Shortlist me");
+    if (/eligib|qualification|requirement/.test(r)) fallback.push("Eligibility", "Apply now");
+    if (fallback.length === 0) fallback.push("Top colleges", "Fees?", "Shortlist me");
+    return fallback;
+  };
+
+  // If server didn't give chips, generate from reply
+  if (!chips || chips.length === 0) {
+    chips = buildFallback(lastReplyText);
   }
 
-  chips = chips.map(c => {
-    const parts = c.split(/\s+/).slice(0,4);
-    return parts.join(' ');
-  }).slice(0,6);
+  // Detect if lastReplyText is a question that needs Yes/No
+  const yesNoPattern = /(would you like|want more details|want more|more details|do you want|yes or no|would you like more|need details|need more)/i;
+  const endsWithQuestion = /\?\s*$/.test((lastReplyText || "").trim());
+  if ((lastReplyText && yesNoPattern.test(lastReplyText)) || endsWithQuestion) {
+    // Prepend Yes / No if not already present
+    if (!chips.some(c => /^yes$/i.test(c))) chips.unshift("Yes");
+    if (!chips.some(c => /^no$/i.test(c))) {
+      // put No after Yes
+      const yesIndex = chips.findIndex(c => /^yes$/i.test(c));
+      chips.splice(yesIndex + 1, 0, "No");
+    }
+  }
 
+  // Clean each chip to max 4 words and limit to 6 chips
+  chips = chips.map(c => c.split(/\s+/).slice(0,4).join(' ')).slice(0,6);
+
+  // Final fallback safety
   if (chips.length === 0) chips = ["Top colleges", "Fees?", "Shortlist me"];
 
+  // Render in DOM
   chipsArea.innerHTML = "";
   chips.forEach(text => {
     const chip = document.createElement("div");
-    const primaryClass = isConversionChip(text) ? " primary" : "";
+    const primaryClass = /(apply|shortlist|interested|contact)/i.test(text) ? " primary" : "";
     chip.className = "chip" + primaryClass;
     chip.textContent = text;
     chip.onclick = () => {
-      if (isConversionChip(text)) openLeadModal();
+      if (/(apply|shortlist|interested|contact)/i.test(text)) openLeadModal();
       else submit(text);
     };
     chipsArea.appendChild(chip);
   });
 }
+
 
 // Typing indicator
 function showTyping() {
