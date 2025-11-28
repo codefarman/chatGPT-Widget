@@ -21,13 +21,14 @@
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .widget { width: 100%; max-width: 460px; height: 94vh; background: var(--chat-bg); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; }
 
-/* Header - ChatGPT Style */
-.header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: var(--chat-bg); text-align: center; font-weight: 600; font-size: 17px; position: relative; }
-.close-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; }
+/* Header */
+.header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: var(--chat-bg); text-align: center; font-weight: 600; font-size: 17px; position: relative; display:flex; align-items:center; justify-content:center; gap:8px; }
+.header .title { flex:1; text-align:center; }
+.header .brand { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--muted); }
 
 /* Messages */
 .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
-.msg { max-width: 86%; line-height: 1.5; padding: 12px 16px; border-radius: 16px; animation: fadeIn 0.3s ease; font-size: 15px; }
+.msg { max-width: 86%; line-height: 1.5; padding: 12px 16px; border-radius: 16px; animation: fadeIn 0.25s ease; font-size: 15px; word-break: break-word; }
 .msg.user { align-self: flex-end; background: var(--user-bg); color: white; border-bottom-right-radius: 4px; }
 .msg.bot { align-self: flex-start; background: var(--bot-bg); border-bottom-left-radius: 4px; }
 
@@ -47,8 +48,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* Chips */
 .chips-area { padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 10px; background: var(--chat-bg); border-top: 1px solid #e2e8f0; }
-.chip { padding: 10px 16px; background: #f1f5f9; border-radius: 999px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-.chip:hover { background: #e2e8f0; }
+.chip { padding: 10px 16px; background: #f1f5f9; border-radius: 999px; font-size: 14px; cursor: pointer; transition: all 0.15s; user-select:none; }
+.chip:hover { transform: translateY(-3px); background: #e2e8f0; }
 .chip.primary { background: var(--accent); color: white; }
 
 /* Input */
@@ -63,53 +64,68 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .dot:nth-child(2) { animation-delay: 0.2s; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes blink { 0%,80%,100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* Modal */
-.modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: white; width: 90%; max-width: 400px; border-radius: 16px; padding: 24px; text-align: center; box-shadow: var(--shadow); }
-.modal input { width: 100%; padding: 14px; margin: 12px 0; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 15px; }
-.modal button { margin-top: 10px; padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; }
-.modal .primary { background: var(--accent); color: white; font-weight: 600; }
+.modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: white; width: 90%; max-width: 420px; border-radius: 12px; padding: 20px; text-align: center; box-shadow: var(--shadow); }
+.modal h3 { margin-bottom:8px; font-size:18px; }
+.modal p { color:var(--muted); margin:10px 0 16px; font-size:14px; }
+.modal input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; }
+.modal .controls { display:flex; gap:12px; justify-content:center; margin-top:12px; }
+.modal button { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; }
+.modal .cancel { background:#e6e6e6; color:#111827; }
+.modal .primary { background:var(--accent); color:white; font-weight:600; }
+
+/* Footer - powered by */
+.footer-powered { padding: 8px 12px; text-align:center; font-size:12px; color:var(--muted); border-top:1px solid #f1f5f9; background:transparent; }
 </style>
 </head>
 <body>
 
-<div class="widget">
+<div class="widget" role="application" aria-label="MBA Counselor widget">
   <div class="header">
-    ChatGPT
-    <!-- <button class="close-btn" id="close">×</button> -->
+    <div class="brand">AI</div>
+    <div class="title">AI MBA Counselor</div>
   </div>
 
-  <div id="messages" class="messages"></div>
-  <div id="chipsArea" class="chips-area"></div>
+  <div id="messages" class="messages" aria-live="polite"></div>
 
-  <div class="input-area">
-    <input id="inputField" placeholder="Ask about MBA, fees, colleges..." autocomplete="off"/>
-    <button id="sendBtn">↑</button>
+  <div id="chipsArea" class="chips-area" aria-hidden="false"></div>
+
+  <div class="input-area" role="group" aria-label="chat input">
+    <input id="inputField" placeholder="Ask about MBA, fees, colleges..." autocomplete="off" aria-label="Type a message"/>
+    <button id="sendBtn" aria-label="Send message">↑</button>
   </div>
+
+  <div class="footer-powered">Powered by ChatGPT</div>
 </div>
 
 <!-- Lead Modal -->
-<div id="leadModal" class="modal-back">
+<div id="leadModal" class="modal-back" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="modal">
-    <h3>Get Your Shortlist on WhatsApp</h3>
-    <p style="color:#64748b;margin:12px 0;font-size:14px;">Our counselor will call you in <5 mins</p>
-    <input id="leadName" placeholder="Your Name"/>
-    <input id="leadPhone" placeholder="WhatsApp Number" inputmode="numeric"/>
-    <div>
-      <button onclick="closeLeadModal()">Cancel</button>
-      <button class="primary" id="leadSubmit">Send Now</button>
+    <!-- Updated title and copy per your request -->
+    <h3>Get a callback</h3>
+    <p>We’ll reach out to guide you further.</p>
+
+    <!-- Placeholders updated (no "WhatsApp" text) -->
+    <input id="leadName" placeholder="Your full name" aria-label="Your full name"/>
+    <input id="leadPhone" placeholder="Phone number" inputmode="numeric" aria-label="Phone number"/>
+
+    <div class="controls">
+      <button class="cancel" onclick="closeLeadModal()">Cancel</button>
+      <button class="primary" id="leadSubmit">Send</button>
     </div>
   </div>
 </div>
 
 <script>
-// Config
+// Change these to your backend URLs
 const BACKEND_URL = "https://chatgpt-widget.onrender.com";
 const CHAT_URL = BACKEND_URL + "/chat";
 const LEAD_URL = BACKEND_URL + "/lead";
-const STORAGE_KEY = "mba_chat_v2";   // ← kept just in case you need it later
+
+const STORAGE_KEY = "mba_chat_v2";
 
 let messages = [];
 let awaiting = false;
@@ -119,6 +135,10 @@ const msgs = document.getElementById("messages");
 const chipsArea = document.getElementById("chipsArea");
 const inputField = document.getElementById("inputField");
 const sendBtn = document.getElementById("sendBtn");
+
+// Helpers
+function scrollToBottom() { msgs.scrollTop = msgs.scrollHeight; }
+function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
 
 function appendUser(text) {
   const div = document.createElement("div");
@@ -140,64 +160,75 @@ function renderTiles(tiles) {
   tiles.forEach(tile => {
     const t = document.createElement("div");
     t.className = "tile";
+    const tagsHtml = tile.tags && Array.isArray(tile.tags) ? `<div class="tile-tags">${tile.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : '';
     t.innerHTML = `
-      <div class="tile-title">${tile.title || tile.name}</div>
-      <div class="tile-subtitle">${tile.subtitle || ''}</div>
-      ${tile.tags ? '<div class="tile-tags">' + tile.tags.map(tag => `<span class="tag">${tag}</span>`).join('') + '</div>' : ''}
-      <button class="tile-action" onclick="handleTileAction('${tile.actionChip || 'Shortlist me'}')">${tile.actionChip || 'Shortlist me'}</button>
+      <div class="tile-title">${escapeHtml(tile.title || tile.name || '')}</div>
+      <div class="tile-subtitle">${escapeHtml(tile.subtitle || '')}</div>
+      ${tagsHtml}
+      <button class="tile-action" onclick="handleTileAction('${escapeHtml(tile.actionChip || 'Shortlist me')}')">${escapeHtml(tile.actionChip || 'Shortlist me')}</button>
     `;
     msgs.appendChild(t);
   });
   scrollToBottom();
 }
 
-function renderChips(chips) {
+function isConversionChip(text) {
+  return /(apply|shortlist|interested)/i.test(text);
+}
+
+// Normalize chips, ensure 1-4 words, up to 6, add Yes/No when assistant asks a direct question
+function renderChips(chipsFromServer, lastReplyText) {
+  let chips = Array.isArray(chipsFromServer) ? chipsFromServer.slice() : [];
+
+  chips = chips.map(c => c.toString().trim()).filter(Boolean);
+
+  const yesNoPattern = /(would you like|want more details|want more|more details|do you want|yes or no|would you like more)/i;
+  if (lastReplyText && yesNoPattern.test(lastReplyText)) {
+    if (!chips.some(c => /^Yes$/i.test(c))) chips.unshift("Yes");
+    if (!chips.some(c => /^No$/i.test(c))) chips.splice(1, 0, "No");
+  }
+
+  chips = chips.map(c => {
+    const parts = c.split(/\s+/).slice(0,4);
+    return parts.join(' ');
+  }).slice(0,6);
+
+  if (chips.length === 0) chips = ["Top colleges", "Fees?", "Shortlist me"];
+
   chipsArea.innerHTML = "";
   chips.forEach(text => {
     const chip = document.createElement("div");
-    chip.className = "chip" + (/(apply|shortlist|interested)/i.test(text) ? " primary" : "");
+    const primaryClass = isConversionChip(text) ? " primary" : "";
+    chip.className = "chip" + primaryClass;
     chip.textContent = text;
     chip.onclick = () => {
-      if(/(apply|shortlist|interested)/i.test(text)) openLeadModal();
+      if (isConversionChip(text)) openLeadModal();
       else submit(text);
     };
     chipsArea.appendChild(chip);
   });
 }
 
+// Typing indicator
 function showTyping() {
   const t = document.createElement("div");
   t.className = "msg bot";
-  t.innerHTML = `<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
   t.id = "typing";
+  t.innerHTML = `<div class="typing" aria-hidden="true"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
   msgs.appendChild(t);
   scrollToBottom();
 }
-
 function removeTyping() {
-  const t = document.getElementById("typing");
-  if (t) t.remove();
+  const t = document.getElementById("typing"); if (t) t.remove();
 }
 
-function scrollToBottom() {
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
+// Submit user message to backend /chat
 async function submit(text) {
-  if (awaiting || !text.trim()) return;
+  if (awaiting || !text || !text.trim()) return;
   const userMsg = text.trim();
   appendUser(userMsg);
   inputField.value = "";
   messages.push({ role: "user", content: userMsg });
-
-  // Removed localStorage saving here on purpose
-  // localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
 
   if (/(fee|apply|shortlist|interested|eligibility|placement)/i.test(userMsg)) lastIntent = userMsg;
 
@@ -210,67 +241,89 @@ async function submit(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages })
     });
+
+    if (!res.ok) {
+      throw new Error("Network response not ok");
+    }
+
     const data = await res.json();
     removeTyping();
 
-    const reply = (data.reply || "Let me help you with that.").trim();
+    const reply = (data && data.reply) ? data.reply.toString().trim() : "Let me help you with that.";
     messages.push({ role: "assistant", content: reply });
 
-    // Also not saving assistant reply to localStorage
+    const replyHtml = escapeHtml(reply).replace(/\n/g, "<br>");
+    appendBot(replyHtml);
 
-    if (data.tiles && Array.isArray(data.tiles)) {
+    if (data && data.tiles && Array.isArray(data.tiles) && data.tiles.length) {
       renderTiles(data.tiles);
-    } else {
-      appendBot(reply.replace(/\n/g, '<br>'));
     }
 
-    renderChips(data.chips || ["Top colleges", "Fees?", "Shortlist me"]);
+    renderChips(data && data.chips ? data.chips : [], reply);
   } catch (err) {
     removeTyping();
     appendBot("Sorry, I'm having trouble connecting. Try again.");
+    renderChips([], "");
   } finally {
     awaiting = false;
   }
 }
 
-// Lead Modal
+// Lead Modal UI
 function openLeadModal() {
-  document.getElementById("leadModal").style.display = "flex";
+  const modal = document.getElementById("leadModal");
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
   document.getElementById("leadName").focus();
 }
 function closeLeadModal() {
-  document.getElementById("leadModal").style.display = "none";
+  const modal = document.getElementById("leadModal");
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
 }
 
 document.getElementById("leadSubmit").onclick = async () => {
   const name = document.getElementById("leadName").value.trim();
   const phone = document.getElementById("leadPhone").value.replace(/\D/g, "");
   if (!name || phone.length < 10) {
-    alert("Please fill name & valid number");
+    alert("Please enter name and a valid phone number");
     return;
   }
   closeLeadModal();
-  appendBot("Thank you! Our counselor will contact you on WhatsApp shortly 🚀");
-  await fetch(LEAD_URL, { 
-    method: "POST", 
-    body: JSON.stringify({ name, phone, messages, lastIntent }) 
-  });
+
+  // Confirmation message (no false timeline)
+  appendBot("Thanks! We’ll reach out to assist you shortly.");
+
+  // POST lead to backend with conversation context
+  try {
+    await fetch(LEAD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        phone,
+        firstMessage: messages.find(m => m.role === 'user')?.content || "",
+        conversation: messages,
+        timestamp: new Date().toISOString(),
+        lastIntent
+      })
+    });
+  } catch (e) {
+    console.warn("Lead POST failed", e);
+  }
 };
 
 // Input handlers
 sendBtn.onclick = () => submit(inputField.value);
 inputField.addEventListener("keypress", e => { if (e.key === "Enter") submit(inputField.value); });
 
-// ==================== INITIALIZATION – ALWAYS START FRESH ====================
-localStorage.removeItem(STORAGE_KEY);  // This forces a clean slate on every load
-
-messages = [];  // Ensure messages array is empty
-msgs.innerHTML = "";  // Clear any old DOM messages
-
-// Fresh welcome message every time
-appendBot("Hi! I'm your MBA Counselor for working professionals in India.<br>Tap a category below to get started.");
+// Initialization: fresh on load
+messages = [];
+msgs.innerHTML = "";
+appendBot("Hi! I'm your MBA counselor for working professionals in India.<br>Tap a topic below to get started.");
 renderChips(["Online MBA", "Executive MBA", "Offline MBA", "Study Abroad", "Certifications"]);
 
+// Tile action handler
 function handleTileAction(action) {
   if (/(shortlist|apply|interested)/i.test(action)) openLeadModal();
   else submit(action);
