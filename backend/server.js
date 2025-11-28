@@ -348,9 +348,8 @@ Always output a strict JSON object and nothing else.
       model: "gpt-4o-mini",
       messages: payloadMessages,
       temperature: 0.0,
-      max_tokens: 10000,
+      max_tokens: 1200,
     });
-
     const elapsed = Date.now() - startTime;
     console.log(` OpenAI API response received (${elapsed}ms)`);
 
