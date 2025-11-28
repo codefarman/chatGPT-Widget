@@ -17,68 +17,47 @@
   --radius: 16px;
   --shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
-* { box-sizing: border-box; margin:0; padding:0; }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
-.widget { width: 100%; max-width: 460px; height: 94vh; background: var(--chat-bg); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; }
-
-/* Header */
-.header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: var(--chat-bg); text-align: center; font-weight: 600; font-size: 17px; position: relative; display:flex; align-items:center; justify-content:center; gap:8px; }
-.header .title { flex:1; text-align:center; }
-.header .brand { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--muted); }
-
-/* Messages */
-.messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
-.msg { max-width: 86%; line-height: 1.5; padding: 12px 16px; border-radius: 16px; animation: fadeIn 0.25s ease; font-size: 15px; word-break: break-word; }
-.msg.user { align-self: flex-end; background: var(--user-bg); color: white; border-bottom-right-radius: 4px; }
-.msg.bot { align-self: flex-start; background: var(--bot-bg); border-bottom-left-radius: 4px; }
-
-/* Markdown & Lists */
-.msg.bot p { margin: 8px 0; }
-.msg.bot ul, .msg.bot ol { margin: 10px 0; padding-left: 20px; }
-.msg.bot strong { font-weight: 600; }
-
-/* Tiles / Cards */
-.tile { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin: 12px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.2s; cursor: pointer; }
-.tile:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
-.tile-title { font-weight: 600; font-size: 16px; margin-bottom: 6px; }
-.tile-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-.tile-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
-.tag { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
-.tile-action { margin-top: 12px; padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; }
-
-/* Chips */
-.chips-area { padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 10px; background: var(--chat-bg); border-top: 1px solid #e2e8f0; }
-.chip { padding: 10px 16px; background: #f1f5f9; border-radius: 999px; font-size: 14px; cursor: pointer; transition: all 0.15s; user-select:none; }
-.chip:hover { transform: translateY(-3px); background: #e2e8f0; }
-.chip.primary { background: var(--accent); color: white; }
-
-/* Input */
-.input-area { padding: 16px 20px; background: var(--chat-bg); border-top: 1px solid #e2e8f0; display: flex; gap: 12px; align-items: center; }
-#inputField { flex: 1; padding: 14px 18px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 15px; outline: none; }
-#inputField:focus { border-color: var(--accent); }
-#sendBtn { background: var(--accent); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 18px; }
-
-/* Typing & Animations */
-.typing { display: inline-flex; gap: 4px; align-items: center; }
-.dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: blink 1.4s infinite both; }
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink { 0%,80%,100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-/* Modal */
-.modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: white; width: 90%; max-width: 420px; border-radius: 12px; padding: 20px; text-align: center; box-shadow: var(--shadow); }
-.modal h3 { margin-bottom:8px; font-size:18px; }
-.modal p { color:var(--muted); margin:10px 0 16px; font-size:14px; }
-.modal input { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; }
-.modal .controls { display:flex; gap:12px; justify-content:center; margin-top:12px; }
-.modal button { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; }
-.modal .cancel { background:#e6e6e6; color:#111827; }
-.modal .primary { background:var(--accent); color:white; font-weight:600; }
-
-/* Footer - powered by */
-.footer-powered { padding: 8px 12px; text-align:center; font-size:12px; color:var(--muted); border-top:1px solid #f1f5f9; background:transparent; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.widget{width:100%;max-width:460px;height:94vh;background:var(--chat-bg);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0}
+.header{padding:14px 20px;border-bottom:1px solid #e2e8f0;background:var(--chat-bg);text-align:center;font-weight:600;font-size:17px;position:relative;display:flex;align-items:center;justify-content:center;gap:8px}
+.header .title{flex:1;text-align:center}
+.header .brand{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted)}
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px}
+.msg{max-width:86%;line-height:1.5;padding:12px 16px;border-radius:16px;animation:fadeIn .25s ease;font-size:15px;word-break:break-word}
+.msg.user{align-self:flex-end;background:var(--user-bg);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--bot-bg);border-bottom-left-radius:4px}
+.tile{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 4px 12px rgba(0,0,0,0.04);transition:all .2s;cursor:pointer}
+.tile:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.1)}
+.tile-title{font-weight:600;font-size:16px;margin-bottom:6px}
+.tile-subtitle{font-size:13px;color:var(--muted);margin-bottom:10px}
+.tile-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tag{background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:500}
+.tile-action{margin-top:12px;padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;width:100%}
+.chips-area{padding:12px 20px;display:none;flex-wrap:wrap;gap:10px;background:var(--chat-bg);border-top:1px solid #e2e8f0}
+.chip{padding:10px 16px;background:#f1f5f9;border-radius:999px;font-size:14px;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{transform:translateY(-3px);background:#e2e8f0}
+.chip.primary{background:var(--accent);color:#fff}
+.input-area{padding:16px 20px;background:var(--chat-bg);border-top:1px solid #e2e8f0;display:flex;gap:12px;align-items:center}
+#inputField{flex:1;padding:14px 18px;border:1px solid #cbd5e1;border-radius:12px;font-size:15px;outline:none}
+#inputField:focus{border-color:var(--accent)}
+#sendBtn{background:var(--accent);color:#fff;border:none;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:18px}
+.typing{display:inline-flex;gap:4px;align-items:center}
+.dot{width:8px;height:8px;background:#94a3b8;border-radius:50%;animation:blink 1.4s infinite both}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;width:90%;max-width:420px;border-radius:12px;padding:20px;text-align:center;box-shadow:var(--shadow)}
+.modal h3{margin-bottom:8px;font-size:18px}
+.modal p{color:var(--muted);margin:10px 0 16px;font-size:14px}
+.modal input{width:100%;padding:14px;margin:8px 0;border:1px solid #cbd5e1;border-radius:10px;font-size:15px}
+.modal .controls{display:flex;gap:12px;justify-content:center;margin-top:12px}
+.modal button{padding:10px 16px;border:none;border-radius:10px;cursor:pointer}
+.modal .cancel{background:#e6e6e6;color:#111827}
+.modal .primary{background:var(--accent);color:#fff;font-weight:600}
+.footer-powered{padding:8px 12px;text-align:center;font-size:12px;color:var(--muted);border-top:1px solid #f1f5f9;background:transparent}
 </style>
 </head>
 <body>
@@ -90,8 +69,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   </div>
 
   <div id="messages" class="messages" aria-live="polite"></div>
-
-  <div id="chipsArea" class="chips-area" aria-hidden="false"></div>
+  <div id="chipsArea" class="chips-area" aria-hidden="true"></div>
 
   <div class="input-area" role="group" aria-label="chat input">
     <input id="inputField" placeholder="Ask about MBA, fees, colleges..." autocomplete="off" aria-label="Type a message"/>
@@ -104,14 +82,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- Lead Modal -->
 <div id="leadModal" class="modal-back" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="modal">
-    <!-- Updated title and copy per your request -->
     <h3>Get a callback</h3>
     <p>We’ll reach out to guide you further.</p>
-
-    <!-- Placeholders updated (no "WhatsApp" text) -->
     <input id="leadName" placeholder="Your full name" aria-label="Your full name"/>
     <input id="leadPhone" placeholder="Phone number" inputmode="numeric" aria-label="Phone number"/>
-
     <div class="controls">
       <button class="cancel" onclick="closeLeadModal()">Cancel</button>
       <button class="primary" id="leadSubmit">Send</button>
@@ -120,11 +94,9 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 </div>
 
 <script>
-// Change these to your backend URLs
 const BACKEND_URL = "https://chatgpt-widget.onrender.com";
 const CHAT_URL = BACKEND_URL + "/chat";
 const LEAD_URL = BACKEND_URL + "/lead";
-
 const STORAGE_KEY = "mba_chat_v2";
 
 let messages = [];
@@ -135,6 +107,16 @@ const msgs = document.getElementById("messages");
 const chipsArea = document.getElementById("chipsArea");
 const inputField = document.getElementById("inputField");
 const sendBtn = document.getElementById("sendBtn");
+
+function showChipsContainer() {
+  chipsArea.style.display = "flex";
+  chipsArea.setAttribute("aria-hidden", "false");
+}
+function hideChipsContainer() {
+  chipsArea.innerHTML = "";
+  chipsArea.style.display = "none";
+  chipsArea.setAttribute("aria-hidden", "true");
+}
 
 // Helpers
 function scrollToBottom() { msgs.scrollTop = msgs.scrollHeight; }
@@ -160,78 +142,71 @@ function renderTiles(tiles) {
   tiles.forEach(tile => {
     const t = document.createElement("div");
     t.className = "tile";
-    const tagsHtml = tile.tags && Array.isArray(tile.tags) ? `<div class="tile-tags">${tile.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : '';
+    const tagsHtml = tile.tags && Array.isArray(tile.tags)
+      ? `<div class="tile-tags">${tile.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>`
+      : '';
     t.innerHTML = `
       <div class="tile-title">${escapeHtml(tile.title || tile.name || '')}</div>
       <div class="tile-subtitle">${escapeHtml(tile.subtitle || '')}</div>
       ${tagsHtml}
-      <button class="tile-action" onclick="handleTileAction('${escapeHtml(tile.actionChip || 'Shortlist me')}')">${escapeHtml(tile.actionChip || 'Shortlist me')}</button>
+      <button class="tile-action" onclick="handleTileAction('${escapeHtml(tile.actionChip || 'Shortlist me')}')">
+        ${escapeHtml(tile.actionChip || 'Shortlist me')}
+      </button>
     `;
     msgs.appendChild(t);
   });
   scrollToBottom();
 }
 
-function isConversionChip(text) {
-  return /(apply|shortlist|interested)/i.test(text);
-}
-
-// Improved renderChips: always ensure 1-6 useful chips, add Yes/No when needed
+// Chip rendering logic: only show relevant chips, hide otherwise
 function renderChips(chipsFromServer, lastReplyText) {
-  // normalize input
-  let chips = Array.isArray(chipsFromServer) ? chipsFromServer.map(c => String(c).trim()).filter(Boolean) : [];
+  let chips = Array.isArray(chipsFromServer)
+    ? chipsFromServer.map(c => String(c).trim()).filter(Boolean)
+    : [];
 
-  // If server returned nothing or only trivial chips, build fallback chips from the reply
   const buildFallback = (reply) => {
     const fallback = [];
     const r = (reply || "").toLowerCase();
-
-    if (/fee|cost|₹|costs|price|scholarship/.test(r)) fallback.push("Fees?", "Scholarship options");
-    if (/college|top colleges|top mba|top colleges in|list|give list/.test(r)) fallback.push("Top colleges", "Shortlist me");
-    if (/eligib|qualification|requirement/.test(r)) fallback.push("Eligibility", "Apply now");
-    if (fallback.length === 0) fallback.push("Top colleges", "Fees?", "Shortlist me");
+    if (/fee|cost|₹|scholar/.test(r)) fallback.push("Fees?", "Scholarship options");
+    if (/college|top mba|list/.test(r)) fallback.push("Top colleges", "Shortlist me");
+    if (/eligib|requirement/.test(r)) fallback.push("Eligibility", "Apply now");
+    if (!fallback.length) fallback.push("Top colleges", "Fees?", "Shortlist me");
     return fallback;
   };
 
-  // If server didn't give chips, generate from reply
-  if (!chips || chips.length === 0) {
+  if (!chips.length) {
     chips = buildFallback(lastReplyText);
   }
 
-  // Detect if lastReplyText is a question that needs Yes/No
-  const yesNoPattern = /(would you like|want more details|want more|more details|do you want|yes or no|would you like more|need details|need more)/i;
+  const yesNoPattern = /(would you like|want more|need more|do you want|yes or no|apply now\?|interested\?)/i;
   const endsWithQuestion = /\?\s*$/.test((lastReplyText || "").trim());
+
   if ((lastReplyText && yesNoPattern.test(lastReplyText)) || endsWithQuestion) {
-    // Prepend Yes / No if not already present
     if (!chips.some(c => /^yes$/i.test(c))) chips.unshift("Yes");
     if (!chips.some(c => /^no$/i.test(c))) {
-      // put No after Yes
       const yesIndex = chips.findIndex(c => /^yes$/i.test(c));
       chips.splice(yesIndex + 1, 0, "No");
     }
   }
 
-  // Clean each chip to max 4 words and limit to 6 chips
   chips = chips.map(c => c.split(/\s+/).slice(0,4).join(' ')).slice(0,6);
 
-  // Final fallback safety
-  if (chips.length === 0) chips = ["Top colleges", "Fees?", "Shortlist me"];
+  if (!chips.length) {
+    hideChipsContainer();
+    return;
+  }
 
-  // Render in DOM
+  showChipsContainer();
   chipsArea.innerHTML = "";
   chips.forEach(text => {
     const chip = document.createElement("div");
-    const primaryClass = /(apply|shortlist|interested|contact)/i.test(text) ? " primary" : "";
-    chip.className = "chip" + primaryClass;
+    const isConversion = /(apply|shortlist|interested|contact|call|enrol)/i.test(text);
+    chip.className = "chip" + (isConversion ? " primary" : "");
     chip.textContent = text;
-    chip.onclick = () => {
-      if (/(apply|shortlist|interested|contact)/i.test(text)) openLeadModal();
-      else submit(text);
-    };
+    chip.onclick = () => isConversion ? openLeadModal() : submit(text);
     chipsArea.appendChild(chip);
   });
 }
-
 
 // Typing indicator
 function showTyping() {
@@ -243,10 +218,11 @@ function showTyping() {
   scrollToBottom();
 }
 function removeTyping() {
-  const t = document.getElementById("typing"); if (t) t.remove();
+  const t = document.getElementById("typing");
+  if (t) t.remove();
 }
 
-// Submit user message to backend /chat
+// Submit user message
 async function submit(text) {
   if (awaiting || !text || !text.trim()) return;
   const userMsg = text.trim();
@@ -265,25 +241,17 @@ async function submit(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages })
     });
-
-    if (!res.ok) {
-      throw new Error("Network response not ok");
-    }
+    if (!res.ok) throw new Error("Network response not ok");
 
     const data = await res.json();
     removeTyping();
 
-    const reply = (data && data.reply) ? data.reply.toString().trim() : "Let me help you with that.";
+    const reply = data?.reply ? data.reply.toString().trim() : "Let me help you with that.";
     messages.push({ role: "assistant", content: reply });
+    appendBot(escapeHtml(reply).replace(/\n/g, "<br>"));
 
-    const replyHtml = escapeHtml(reply).replace(/\n/g, "<br>");
-    appendBot(replyHtml);
-
-    if (data && data.tiles && Array.isArray(data.tiles) && data.tiles.length) {
-      renderTiles(data.tiles);
-    }
-
-    renderChips(data && data.chips ? data.chips : [], reply);
+    if (data?.tiles?.length) renderTiles(data.tiles);
+    renderChips(data?.chips || [], reply);
   } catch (err) {
     removeTyping();
     appendBot("Sorry, I'm having trouble connecting. Try again.");
@@ -293,7 +261,7 @@ async function submit(text) {
   }
 }
 
-// Lead Modal UI
+// Lead modal logic
 function openLeadModal() {
   const modal = document.getElementById("leadModal");
   modal.style.display = "flex";
@@ -314,11 +282,9 @@ document.getElementById("leadSubmit").onclick = async () => {
     return;
   }
   closeLeadModal();
-
-  // Confirmation message (no false timeline)
   appendBot("Thanks! We’ll reach out to assist you shortly.");
+  hideChipsContainer();
 
-  // POST lead to backend with conversation context
   try {
     await fetch(LEAD_URL, {
       method: "POST",
@@ -341,7 +307,7 @@ document.getElementById("leadSubmit").onclick = async () => {
 sendBtn.onclick = () => submit(inputField.value);
 inputField.addEventListener("keypress", e => { if (e.key === "Enter") submit(inputField.value); });
 
-// Initialization: fresh on load
+// Initial state
 messages = [];
 msgs.innerHTML = "";
 appendBot("Hi! I'm your MBA counselor for working professionals in India.<br>Tap a topic below to get started.");
